@@ -23,26 +23,4 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=user
 
-  ewm-service:
-    build: main-service
-    container_name: main-server-container
-    ports:
-      - "8080:8080"
-    depends_on:
-      - ewm-db
-    environment:
-      - GATEWAY_URL=http://stats-server:9090
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://ewm-db:5432/ewm
-      - SPRING_DATASOURCE_USERNAME=postgres
-      - SPRING_DATASOURCE_PASSWORD=user
-      - SPRING_DRIVER_CLASS_NAME=org.postgresql.Driver
 
-  ewm-db:
-    image: postgres:16.1
-    container_name: ewm-db-container
-    ports:
-      - "6542:5432"
-    environment:
-      - POSTGRES_DB=ewm
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=user
