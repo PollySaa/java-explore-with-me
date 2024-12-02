@@ -28,9 +28,9 @@ public class StatsController {
 
     @GetMapping("/stats")
     public List<ViewStatsDto> getStatsByDateAndUris(@RequestParam String start,
-                                                 @RequestParam String end,
-                                                 @RequestParam(required = false) List<String> uris,
-                                                 @RequestParam(defaultValue = "false") Boolean unique) {
+                                                    @RequestParam String end,
+                                                    @RequestParam(required = false) List<String> uris,
+                                                    @RequestParam(defaultValue = "false") Boolean unique) {
         log.info("Выполнение getStatsByDateAndUris");
         return service.getStatsByDateAndUris(start, end, uris, unique);
     }
