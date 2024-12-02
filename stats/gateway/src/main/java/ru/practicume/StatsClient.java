@@ -1,59 +1,42 @@
 package ru.practicume;
 
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.experimental.FieldDefaults;
-import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 import ru.practicum.EndpointHitDto;
 import ru.practicum.ViewStatsDto;
+import ru.practicum.stats.model.EndpointHit;
 
-import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.util.Collections;
 import java.util.List;
 
-@AllArgsConstructor
-@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @Component
 public class StatsClient {
-    RestTemplate restTemplate;
-    String statsServiceUrl;
+    private final RestTemplate rest;
+    private final String urlStats;
 
-    public void createHit(EndpointHitDto requestDto) {
-        String url = statsServiceUrl + "/hit";
-        HttpEntity<EndpointHitDto> requestEntity = new HttpEntity<>(requestDto);
-        restTemplate.exchange(url, HttpMethod.POST, requestEntity, Void.class);
+    public StatsClient(RestTemplate rest, @Value("${gateway.url}") String urlStats) {
+        this.rest = rest;
+        this.urlStats = urlStats;
     }
 
-    public List<ViewStatsDto> getStatsByPeriodAndUris(String start, String end, List<String> uris, Boolean unique) {
-        try {
-            String decodedStart = URLDecoder.decode(start, StandardCharsets.UTF_8);
-            String decodedEnd = URLDecoder.decode(end, StandardCharsets.UTF_8);
+    public EndpointHit createHit(EndpointHitDto endpointHitDto) {
+        HttpEntity<EndpointHitDto> requestEntity = new HttpEntity<>(endpointHitDto);
+        ResponseEntity<EndpointHit> responseEntity = rest.postForEntity(urlStats + "/hit", requestEntity,
+                EndpointHit.class);
+        return responseEntity.getBody();
+    }
 
-            String url = UriComponentsBuilder.fromHttpUrl(statsServiceUrl + "/stats")
-                    .queryParam("start", decodedStart)
-                    .queryParam("end", decodedEnd)
-                    .queryParam("uris", uris != null ? String.join(",", uris) : null)
-                    .queryParam("unique", unique)
-                    .toUriString();
+    public ViewStatsDto getStatsByDateAndUris(String start, String end, List<String> uris, Boolean unique) {
 
-            ResponseEntity<List<ViewStatsDto>> response = restTemplate.exchange(
-                    url,
-                    HttpMethod.GET,
-                    null,
-                    new ParameterizedTypeReference<List<ViewStatsDto>>() {}
-            );
-
-            return response.getBody();
-        } catch (Exception e) {
-            e.printStackTrace();
-            return Collections.emptyList();
-        }
+        UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(urlStats + "/stats")
+                .queryParam("start", start).encode(StandardCharsets.UTF_8)
+                .queryParam("end", end).encode(StandardCharsets.UTF_8)
+                .queryParam("uris", uris)
+                .queryParam("unique", unique);
+        return rest.getForObject(builder.toUriString(), ViewStatsDto.class);
     }
 }
