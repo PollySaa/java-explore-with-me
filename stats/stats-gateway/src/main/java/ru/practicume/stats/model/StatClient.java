@@ -1,4 +1,4 @@
-package ru.practicume;
+package ru.practicume.stats.model;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -11,6 +11,7 @@ import org.springframework.web.util.DefaultUriBuilderFactory;
 import org.springframework.web.util.UriComponentsBuilder;
 import ru.practicum.EndpointHitDto;
 import ru.practicum.stats.model.EndpointHit;
+import ru.practicume.stats.client.BaseClient;
 
 import java.util.List;
 

@@ -1,4 +1,4 @@
-package ru.practicume;
+package ru.practicume.stats.client;
 
 import io.micrometer.common.lang.Nullable;
 import org.springframework.http.*;

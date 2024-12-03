@@ -1,4 +1,4 @@
-package ru.practicume;
+package ru.practicume.stats.model;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
