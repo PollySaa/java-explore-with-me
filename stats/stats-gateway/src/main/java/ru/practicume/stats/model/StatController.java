@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.EndpointHitDto;
-import ru.practicum.stats.model.EndpointHit;
+import ru.practicum.model.EndpointHit;
 
 import java.util.List;
 

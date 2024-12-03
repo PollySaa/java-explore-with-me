@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 import org.springframework.web.util.UriComponentsBuilder;
 import ru.practicum.EndpointHitDto;
-import ru.practicum.stats.model.EndpointHit;
+import ru.practicum.model.EndpointHit;
 import ru.practicume.stats.client.BaseClient;
 
 import java.util.List;

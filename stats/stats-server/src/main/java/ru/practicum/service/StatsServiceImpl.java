@@ -1,4 +1,4 @@
-package ru.practicum.stats.service;
+package ru.practicum.service;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -9,8 +9,7 @@ import ru.practicum.ViewStatsDto;
 import ru.practicum.constants.Constants;
 import ru.practicum.exceptions.ValidationException;
 import ru.practicum.mapper.StatsMapper;
-import ru.practicum.stats.model.EndpointHit;
-
+import ru.practicum.model.EndpointHit;
 
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;

@@ -1,11 +1,10 @@
-package ru.practicum.stats.service;
+package ru.practicum.service;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import ru.practicum.ViewStatsDto;
-import ru.practicum.stats.model.EndpointHit;
-
+import ru.practicum.model.EndpointHit;
 
 import java.time.LocalDateTime;
 import java.util.List;
