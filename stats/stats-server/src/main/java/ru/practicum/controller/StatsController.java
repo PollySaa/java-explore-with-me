@@ -14,9 +14,9 @@ import java.util.List;
 
 @Slf4j
 @AllArgsConstructor
-@FieldDefaults(level = AccessLevel.PRIVATE)
 @RestController
 @RequestMapping
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class StatsController {
     StatsService service;
 

@@ -21,7 +21,7 @@ import java.util.List;
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 @AllArgsConstructor
 public class StatsServiceImpl implements StatsService {
-    final StatsRepository statsRepository;
+    StatsRepository statsRepository;
 
     @Override
     public EndpointHit createHit(EndpointHitDto endpointHitDto) {
