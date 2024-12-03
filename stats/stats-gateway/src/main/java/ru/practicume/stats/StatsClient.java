@@ -2,13 +2,11 @@ package ru.practicume.stats;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 import ru.practicum.EndpointHitDto;
 import ru.practicum.ViewStatsDto;
-import ru.practicum.model.EndpointHit;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -18,14 +16,14 @@ public class StatsClient  {
     private final RestTemplate rest;
     private final String statUrl;
 
-    public StatsClient(RestTemplate rest, @Value("${client.url}") String statUrl) {
+    public StatsClient(RestTemplate rest, @Value("${stats-gateway.url}") String statUrl) {
         this.rest = rest;
         this.statUrl = statUrl;
     }
 
-    public ResponseEntity<EndpointHit> createHit(EndpointHitDto endpointHitDto) {
-        HttpEntity<EndpointHitDto> requestEntity = new HttpEntity<>(endpointHitDto);
-        return rest.postForEntity(statUrl, requestEntity, EndpointHit.class);
+    public void createHitStats(EndpointHitDto statRequestDto) {
+        HttpEntity<EndpointHitDto> requestEntity = new HttpEntity<>(statRequestDto);
+        rest.postForEntity(statUrl + "/hit", requestEntity, Void.class);
     }
 
     public ViewStatsDto getStatsByDateAndUris(String start, String end, List<String> uris, Boolean unique) {
