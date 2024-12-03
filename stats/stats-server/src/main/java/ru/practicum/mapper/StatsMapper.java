@@ -3,7 +3,7 @@ package ru.practicum.mapper;
 import lombok.experimental.UtilityClass;
 import ru.practicum.EndpointHitDto;
 import ru.practicum.constants.Constants;
-import ru.practicum.stats.model.EndpointHit;
+import ru.practicum.model.EndpointHit;
 
 import java.time.LocalDateTime;
 
