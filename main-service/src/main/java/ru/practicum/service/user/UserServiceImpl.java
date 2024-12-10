@@ -13,7 +13,6 @@ import ru.practicum.mapper.UserMapper;
 import ru.practicum.model.User;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)

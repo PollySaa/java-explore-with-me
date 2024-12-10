@@ -90,11 +90,11 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public List<RequestDto> getRequestsByOwnerEventAndEventId(Long OwnerId, Long eventId) {
-        checkExistUser(OwnerId);
+    public List<RequestDto> getRequestsByOwnerEventAndEventId(Long ownerId, Long eventId) {
+        checkExistUser(ownerId);
         Event event = getEventById(eventId);
 
-        if (!event.getInitiator().getId().equals(OwnerId)) {
+        if (!event.getInitiator().getId().equals(ownerId)) {
             throw new ValidationException("Информацию о запросах на участие может смотреть только организатор события!");
         }
 
@@ -106,12 +106,12 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public ResultRequestStatusDto approveRequestByOwnerId(Long OwnerId, Long eventId,
+    public ResultRequestStatusDto approveRequestByOwnerId(Long ownerId, Long eventId,
                                                                EventRequestStatus eventRequestStatus) {
-        checkExistUser(OwnerId);
+        checkExistUser(ownerId);
         Event event = getEventById(eventId);
 
-        if (!event.getInitiator().getId().equals(OwnerId)) {
+        if (!event.getInitiator().getId().equals(ownerId)) {
             throw new ValidationException("Изменять статус запросов на участие может только организатор события!");
         }
 

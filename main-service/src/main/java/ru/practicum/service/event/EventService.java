@@ -16,8 +16,8 @@ public interface EventService {
 
     List<EventShortDto> getEventsByUserId(Long userId, Integer from,Integer size);
 
-    List<RequestDto> getRequestsByOwnerEventAndEventId(Long OwnerId, Long eventId);
+    List<RequestDto> getRequestsByOwnerEventAndEventId(Long ownerId, Long eventId);
 
-    ResultRequestStatusDto approveRequestByOwnerId(Long OwnerId, Long eventId,
+    ResultRequestStatusDto approveRequestByOwnerId(Long ownerId, Long eventId,
                                                         EventRequestStatus eventRequestStatus);
 }
