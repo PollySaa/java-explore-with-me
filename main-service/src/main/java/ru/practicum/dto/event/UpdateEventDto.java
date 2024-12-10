@@ -1,6 +1,7 @@
 package ru.practicum.dto.event;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -17,32 +18,36 @@ import java.time.LocalDateTime;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class UpdateEventDto {
 
-    @NotBlank
+    @Nullable
     @Size(min = 20, max = 2000)
     String annotation;
 
-    @NotBlank
+    @Nullable
     @Size(min = 20, max = 7000)
     String description;
 
-    @NotNull
+    @Nullable
     Long category;
 
+    @Nullable
     @Future
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = Constants.DATE_PATTERN)
     LocalDateTime eventDate;
 
-    @NotNull
+    @Nullable
     LocationDto location;
 
+    @Nullable
     Boolean paid;
 
+    @Nullable
     @PositiveOrZero
     Integer participantLimit;
 
+    @Nullable
     Boolean requestModeration;
 
-    @NotBlank
+    @Nullable
     @Size(min = 3, max = 500)
     String title;
 

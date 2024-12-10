@@ -19,7 +19,7 @@ public class RequestMapper {
                 .id(request.getId())
                 .event(request.getEvent().getId())
                 .requester(request.getId())
-                .createdDate(request.getCreatedDate())
+                .createdOn(request.getCreatedOn())
                 .status(request.getStatus())
                 .build();
     }
@@ -28,7 +28,7 @@ public class RequestMapper {
         return Request.builder()
                 .event(event)
                 .requester(requester)
-                .createdDate(LocalDateTime.now())
+                .createdOn(LocalDateTime.now())
                 .status(event.getRequestModeration() ? Status.PENDING : Status.CONFIRMED)
                 .build();
     }

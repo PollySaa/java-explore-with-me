@@ -104,7 +104,7 @@ public class EventServiceImpl implements EventService {
         }
 
         List<Request> requests = requestRepository.findRequestsByEventId(eventId, Sort.by(Sort.Direction.DESC,
-                "createdDate"));
+                "createdOn"));
         return requests.stream()
                 .map(RequestMapper::toRequestDto)
                 .collect(Collectors.toList());

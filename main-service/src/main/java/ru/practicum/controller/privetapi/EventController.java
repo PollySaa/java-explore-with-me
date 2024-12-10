@@ -4,6 +4,7 @@ import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.dto.event.*;
 import ru.practicum.dto.request.RequestDto;
@@ -21,6 +22,7 @@ public class EventController {
     EventService eventService;
 
     @PostMapping("/{user-id}/events")
+    @ResponseStatus(HttpStatus.CREATED)
     public EventDto createEvent(@PathVariable("user-id") Long id,
                                 @RequestBody NewEventDto newEventDto) {
         log.info("Выполнение createEvent");

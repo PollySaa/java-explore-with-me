@@ -78,7 +78,7 @@ public class RequestServiceImpl implements RequestService {
     public List<ResultRequestStatusDto> getRequestsByUserId(Long id) {
         getUserById(id);
         List<Request> requests = requestRepository.findAllByRequesterId(id, Sort.by(Sort.Direction.DESC,
-                "createdDate"));
+                "createdOn"));
         return List.of(RequestMapper.toRequest(requests));
     }
 

@@ -84,7 +84,7 @@ public class PublicEventServiceImpl implements PublicEventService {
 
         statsClient.createHit(createEndpointHitDto(request));
 
-        String start = event.getCreatedDate().withNano(0).format(DateTimeFormatter.ofPattern(Constants.DATE_PATTERN));
+        String start = event.getCreatedOn().withNano(0).format(DateTimeFormatter.ofPattern(Constants.DATE_PATTERN));
         String end = event.getEventDate().withNano(0).format(DateTimeFormatter.ofPattern(Constants.DATE_PATTERN));
         List<ViewStatsDto> viewStatsDtoList = statsClient.getStatsByDateAndUris(start, end, List.of(request.getRequestURI()), true);
 

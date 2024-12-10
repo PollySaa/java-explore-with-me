@@ -4,6 +4,7 @@ import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.dto.request.RequestDto;
 import ru.practicum.dto.request.ResultRequestStatusDto;
@@ -20,6 +21,7 @@ public class RequestController {
      RequestService requestService;
 
      @PostMapping("/{user-id}/requests")
+     @ResponseStatus(HttpStatus.CREATED)
      public RequestDto createRequest(@PathVariable("user-id") Long id,
                                      @RequestParam(required = false) Long eventId) {
          log.info("Выполнение createRequest");

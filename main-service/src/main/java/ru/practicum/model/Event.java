@@ -39,14 +39,14 @@ public class Event {
     @JoinColumn(name = "location_id")
     Location location;
 
-    @Column(name = "created_date")
-    LocalDateTime createdDate;
+    @Column(name = "created_on")
+    LocalDateTime createdOn;
 
     @Column(name = "event_date")
     LocalDateTime eventDate;
 
-    @Column(name = "published_date")
-    LocalDateTime publishedDate;
+    @Column(name = "published_on")
+    LocalDateTime publishedOn;
 
     Boolean paid;
 

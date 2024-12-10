@@ -31,7 +31,7 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public CategoryDto updateCategory(Long id, CategoryRequest categoryRequest) {
         Category category = getCategoryById(id);
-        if (categoryRepository.existsByName(category.getName())) {
+        if (categoryRepository.existsByName(categoryRequest.getName())) {
             throw new ConflictException("Эта категория уже существует!");
         }
         category.setName(categoryRequest.getName());

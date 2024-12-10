@@ -24,11 +24,11 @@ public class EventDto {
     CategoryDto category;
     LocationDto location;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = Constants.DATE_PATTERN)
-    LocalDateTime createdDate;
+    LocalDateTime createdOn;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = Constants.DATE_PATTERN)
     LocalDateTime eventDate;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = Constants.DATE_PATTERN)
-    LocalDateTime publishedDate;
+    LocalDateTime publishedOn;
     Boolean paid;
     Integer participantLimit;
     Boolean requestModeration;

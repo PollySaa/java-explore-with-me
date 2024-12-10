@@ -20,14 +20,14 @@ public class EventMapper {
                 .annotation(event.getAnnotation())
                 .category(CategoryMapper.toCategoryDto(event.getCategory()))
                 .confirmedRequests(event.getConfirmedRequests())
-                .createdDate(event.getCreatedDate())
+                .createdOn(event.getCreatedOn())
                 .description(event.getDescription())
                 .eventDate(event.getEventDate())
                 .initiator(UserMapper.toUserShortDto(event.getInitiator()))
                 .location(LocationMapper.toLocationDto(event.getLocation()))
                 .paid(event.getPaid())
                 .participantLimit(event.getParticipantLimit())
-                .publishedDate(event.getPublishedDate())
+                .publishedOn(event.getPublishedOn())
                 .requestModeration(event.getRequestModeration())
                 .state(event.getState())
                 .views(event.getViews())
@@ -53,7 +53,7 @@ public class EventMapper {
                 .annotation(newEventDto.getAnnotation())
                 .category(category)
                 .description(newEventDto.getDescription())
-                .createdDate(LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS))
+                .createdOn(LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS))
                 .eventDate(newEventDto.getEventDate())
                 .location(location)
                 .paid(newEventDto.getPaid() == null ? Boolean.FALSE : newEventDto.getPaid())
@@ -74,7 +74,7 @@ public class EventMapper {
                 case REJECT_EVENT, CANCEL_REVIEW -> newState = State.CANCELED;
                 case PUBLISH_EVENT -> {
                     newState = State.PUBLISHED;
-                    oldEvent.setPublishedDate(LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS));
+                    oldEvent.setPublishedOn(LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS));
                 }
             }
         }

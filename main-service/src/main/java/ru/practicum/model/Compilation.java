@@ -27,8 +27,8 @@ public class Compilation {
 
     @ManyToMany()
     @JoinTable(
-            name = "event_collection",
-            joinColumns = {@JoinColumn(name = "collection_id")},
+            name = "event_compilation",
+            joinColumns = {@JoinColumn(name = "compilation_id")},
             inverseJoinColumns = {@JoinColumn(name = "event_id")}
     )
     Set<Event> events = new HashSet<>();
