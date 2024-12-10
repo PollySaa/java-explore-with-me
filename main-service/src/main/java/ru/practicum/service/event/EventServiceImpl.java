@@ -15,6 +15,7 @@ import ru.practicum.dto.event.*;
 import ru.practicum.dto.request.RequestDto;
 import ru.practicum.dto.request.ResultRequestStatusDto;
 import ru.practicum.dto.request.Status;
+import ru.practicum.exceptions.ConflictException;
 import ru.practicum.exceptions.NotFoundException;
 import ru.practicum.exceptions.ValidationException;
 import ru.practicum.mapper.EventMapper;
@@ -55,11 +56,11 @@ public class EventServiceImpl implements EventService {
         Category newCategory = updateEventDto.getCategory() != null ? getCategoryById(updateEventDto.getCategory())
                 : event.getCategory();
         if (event.getState().equals(State.PUBLISHED)) {
-            throw new ValidationException("События можно изменять в статусах: PENDING или CANCELED");
+            throw new ConflictException("События можно изменять в статусах: PENDING или CANCELED");
         }
 
         if (!event.getInitiator().getId().equals(id)) {
-            throw new ValidationException("Обновлять информация имеет право только организатор!");
+            throw new ConflictException("Обновлять информация имеет право только организатор!");
         }
 
         if (updateEventDto.getEventDate() != null) {
@@ -74,7 +75,7 @@ public class EventServiceImpl implements EventService {
         checkExistUser(userId);
         Event event = getEventById(eventId);
         if (!event.getInitiator().getId().equals(userId)) {
-            throw new ValidationException("Информацию о событии может смотреть только организатор!");
+            throw new ConflictException("Информацию о событии может смотреть только организатор!");
         }
         return EventMapper.toEventDto(event);
     }
@@ -112,7 +113,7 @@ public class EventServiceImpl implements EventService {
         Event event = getEventById(eventId);
 
         if (!event.getInitiator().getId().equals(ownerId)) {
-            throw new ValidationException("Изменять статус запросов на участие может только организатор события!");
+            throw new ConflictException("Изменять статус запросов на участие может только организатор события!");
         }
 
         List<Request> requests = requestRepository.findAllById(eventRequestStatus.getRequestIds());
@@ -121,7 +122,7 @@ public class EventServiceImpl implements EventService {
 
         for (Request request : requests) {
             if (!request.getEvent().getId().equals(eventId)) {
-                throw new ValidationException("Запрос с id = " + request.getId() + " не относится к событию с id = " + eventId);
+                throw new ConflictException("Запрос с id = " + request.getId() + " не относится к событию с id = " + eventId);
             }
 
             if (eventRequestStatus.getStatus().equals("CONFIRMED")) {
@@ -137,7 +138,7 @@ public class EventServiceImpl implements EventService {
                 request.setStatus(Status.REJECTED);
                 rejectedRequests.add(request);
             } else {
-                throw new ValidationException("Неподдерживаемый статус: " + eventRequestStatus.getStatus());
+                throw new ConflictException("Неподдерживаемый статус: " + eventRequestStatus.getStatus());
             }
         }
 

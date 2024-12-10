@@ -21,7 +21,8 @@ public class EventController {
     EventService eventService;
 
     @PostMapping("/{user-id}/events")
-    public EventDto createEvent(@PathVariable("user-id") Long id, @RequestBody NewEventDto newEventDto) {
+    public EventDto createEvent(@PathVariable("user-id") Long id,
+                                @RequestBody NewEventDto newEventDto) {
         log.info("Выполнение createEvent");
         return eventService.createEvent(id, newEventDto);
     }

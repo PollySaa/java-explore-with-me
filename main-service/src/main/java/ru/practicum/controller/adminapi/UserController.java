@@ -4,6 +4,8 @@ import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.dto.user.UserDto;
 import ru.practicum.service.user.UserService;
@@ -19,9 +21,10 @@ public class UserController {
     UserService userService;
 
     @PostMapping
-    public UserDto createUser(@RequestBody UserDto userDto) {
+    public ResponseEntity<UserDto> createUser(@RequestBody UserDto userDto) {
         log.info("Выполнение createUser");
-        return userService.createUser(userDto);
+        UserDto createdUser = userService.createUser(userDto);
+        return new ResponseEntity<>(createdUser, HttpStatus.CREATED);
     }
 
     @DeleteMapping("/{user-id}")
@@ -32,8 +35,8 @@ public class UserController {
 
     @GetMapping
     public List<UserDto> getUsersByIds(@RequestParam(required = false) List<Long> ids,
-                                       @RequestParam Integer from,
-                                       @RequestParam Integer size) {
+                                       @RequestParam(defaultValue = "0") Integer from,
+                                       @RequestParam(defaultValue = "10") Integer size) {
         log.info("getUsersByIds");
         return userService.getUsersByIds(ids, from, size);
     }

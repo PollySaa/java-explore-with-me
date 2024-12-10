@@ -12,6 +12,7 @@ import ru.practicum.dto.event.State;
 import ru.practicum.dto.request.RequestDto;
 import ru.practicum.dto.request.ResultRequestStatusDto;
 import ru.practicum.dto.request.Status;
+import ru.practicum.exceptions.ConflictException;
 import ru.practicum.exceptions.NotFoundException;
 import ru.practicum.exceptions.ValidationException;
 import ru.practicum.mapper.RequestMapper;
@@ -31,18 +32,22 @@ public class RequestServiceImpl implements RequestService {
 
     @Override
     public RequestDto createRequest(Long id, Long eventId) {
+        if (requestRepository.existsByRequesterIdAndEventId(id, eventId)) {
+            throw new ConflictException("Нельзя создавать одинаковый запрос на уже существующее событие!");
+        }
+
         User user = getUserById(id);
         Event event = getEventById(eventId);
-        if (requestRepository.existsByRequesterIdAndEventId(id, eventId)) {
-            throw new ValidationException("Нельзя создавать одинаковый запрос на уже существующее событие!");
+        if (id.equals(event.getInitiator().getId())) {
+            throw new ConflictException("Инициатор события не может добавить запрос на участие в своём же событии");
         }
 
         if (!event.getState().equals(State.PUBLISHED)) {
-            throw new ValidationException("Событие должно быть опубликованно!");
+            throw new ConflictException("Событие должно быть опубликованно!");
         }
 
         if (!event.getParticipantLimit().equals(0) && event.getConfirmedRequests().equals(event.getParticipantLimit())) {
-            throw new ValidationException("Достигнут лимит запросов!");
+            throw new ConflictException("Достигнут лимит запросов!");
         }
 
         Request request = RequestMapper.toRequest(event, user);

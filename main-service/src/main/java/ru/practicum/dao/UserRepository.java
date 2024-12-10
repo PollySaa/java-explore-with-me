@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import ru.practicum.model.User;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<User, Long> {
 
@@ -15,4 +16,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
             where (?1 is null or u.id in ?1)
             """)
     List<User> findUserByIds(List<Long> ids, Pageable pageable);
+
+    Optional<User> findByEmail(String email);
 }

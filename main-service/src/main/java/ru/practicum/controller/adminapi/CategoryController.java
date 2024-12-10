@@ -24,7 +24,8 @@ public class CategoryController {
     }
 
     @PatchMapping("/{cat-id}")
-    public CategoryDto updateCategory(@PathVariable("cat-id") Long id, @RequestBody CategoryRequest categoryRequest) {
+    public CategoryDto updateCategory(@PathVariable("cat-id") Long id,
+                                      @RequestBody CategoryRequest categoryRequest) {
         log.info("Выполнение updateCategory");
         return categoryService.updateCategory(id, categoryRequest);
     }

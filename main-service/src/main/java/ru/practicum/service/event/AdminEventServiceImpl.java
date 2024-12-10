@@ -11,7 +11,9 @@ import ru.practicum.dao.CategoryRepository;
 import ru.practicum.dao.EventRepository;
 import ru.practicum.dto.event.EventAdmin;
 import ru.practicum.dto.event.EventDto;
+import ru.practicum.dto.event.State;
 import ru.practicum.dto.event.UpdateEventDto;
+import ru.practicum.exceptions.ConflictException;
 import ru.practicum.exceptions.NotFoundException;
 import ru.practicum.mapper.EventMapper;
 import ru.practicum.model.Category;
@@ -66,9 +68,22 @@ public class AdminEventServiceImpl implements AdminEventService {
     public EventDto updateEventByAdmin(Long eventId, UpdateEventDto updateEventDto) {
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new NotFoundException("Событие с id = " + eventId + " не было найдено!"));
+
+        if (!event.getState().equals(State.PENDING)) {
+            throw new ConflictException("Событие должно быть в состоянии ожидания публикации!");
+        }
+
+        if (updateEventDto.getEventDate() != null) {
+            LocalDateTime eventDate = updateEventDto.getEventDate();
+            if (eventDate.isBefore(LocalDateTime.now().plusHours(1))) {
+                throw new ConflictException("Дата начала события должна быть не ранее чем за час от текущего времени!");
+            }
+        }
+
         Category category = updateEventDto.getCategory() == null ? event.getCategory()
                 : categoryRepository.findById(updateEventDto.getCategory())
                 .orElseThrow(() -> new NotFoundException("Категория с id = " + updateEventDto.getCategory() + " не была найдена!"));
+
         event = eventRepository.save(EventMapper.toUpdatedEvent(updateEventDto, category, event));
         return EventMapper.toEventDto(event);
     }

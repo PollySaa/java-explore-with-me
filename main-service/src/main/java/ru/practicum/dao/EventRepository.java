@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import ru.practicum.dto.event.State;
+import ru.practicum.model.Category;
 import ru.practicum.model.Event;
 
 import java.time.LocalDateTime;
@@ -58,4 +59,6 @@ public interface EventRepository extends JpaRepository<Event, Long> {
 
     @Query("SELECT e FROM Event e")
     List<Event> findAllEvents(Pageable pageable);
+
+    boolean existsByCategory(Category category);
 }

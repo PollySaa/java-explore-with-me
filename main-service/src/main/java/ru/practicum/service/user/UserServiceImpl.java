@@ -8,6 +8,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import ru.practicum.dao.UserRepository;
 import ru.practicum.dto.user.UserDto;
+import ru.practicum.exceptions.ConflictException;
 import ru.practicum.exceptions.NotFoundException;
 import ru.practicum.mapper.UserMapper;
 import ru.practicum.model.User;
@@ -22,6 +23,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto createUser(UserDto userDto) {
+        if (userRepository.findByEmail(userDto.getEmail()).isPresent()) {
+            throw new ConflictException("Пользователь с таким email: " + userDto.getEmail() + " уже есть!");
+        }
         return UserMapper.toUserDto(userRepository.save(UserMapper.toUser(userDto)));
     }
 
