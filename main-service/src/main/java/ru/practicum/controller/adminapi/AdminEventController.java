@@ -1,5 +1,6 @@
 package ru.practicum.controller.adminapi;
 
+import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -28,7 +29,7 @@ public class AdminEventController {
 
     @PatchMapping("/{event-id}")
     public EventDto updateEventByAdmin(@PathVariable("event-id") Long eventId,
-                                       @RequestBody UpdateEventDto updateEventDto) {
+                                       @RequestBody @Valid UpdateEventDto updateEventDto) {
         log.info("Выполнение updateEventByAdmin");
         return adminEventService.updateEventByAdmin(eventId, updateEventDto);
     }

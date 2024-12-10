@@ -28,6 +28,7 @@ public class UserController {
     }
 
     @DeleteMapping("/{user-id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteUser(@PathVariable("user-id") Long id) {
         log.info("Выполнение deleteUser");
         userService.deleteUser(id);

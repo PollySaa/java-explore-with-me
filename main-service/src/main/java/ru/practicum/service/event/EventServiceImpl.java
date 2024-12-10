@@ -3,14 +3,12 @@ package ru.practicum.service.event;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-import ru.practicum.dao.CategoryRepository;
-import ru.practicum.dao.EventRepository;
-import ru.practicum.dao.RequestRepository;
-import ru.practicum.dao.UserRepository;
+import ru.practicum.dao.*;
 import ru.practicum.dto.event.*;
 import ru.practicum.dto.request.RequestDto;
 import ru.practicum.dto.request.ResultRequestStatusDto;
@@ -19,11 +17,9 @@ import ru.practicum.exceptions.ConflictException;
 import ru.practicum.exceptions.NotFoundException;
 import ru.practicum.exceptions.ValidationException;
 import ru.practicum.mapper.EventMapper;
+import ru.practicum.mapper.LocationMapper;
 import ru.practicum.mapper.RequestMapper;
-import ru.practicum.model.Category;
-import ru.practicum.model.Event;
-import ru.practicum.model.Request;
-import ru.practicum.model.User;
+import ru.practicum.model.*;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -38,15 +34,23 @@ public class EventServiceImpl implements EventService {
     UserRepository userRepository;
     RequestRepository requestRepository;
     CategoryRepository categoryRepository;
+    LocationRepository locationRepository;
 
     @Override
     public EventDto createEvent(Long id, NewEventDto newEventDto) {
-        checkDateTime(newEventDto.getEventDate());
-        User user = getUserById(id);
+        Event event;
         Category category = getCategoryById(newEventDto.getCategory());
-        Event event = EventMapper.toEvent(user, category, newEventDto);
+        User user = getUserById(id);
+        Location location = locationRepository.save(LocationMapper.toLocation(newEventDto.getLocation()));
+        checkDateTime(newEventDto.getEventDate());
+        event = EventMapper.toEvent(user, category, newEventDto, location);
         event.setState(State.PENDING);
-        return EventMapper.toEventDto(eventRepository.save(event));
+        try {
+            event = eventRepository.save(event);
+        } catch (DataIntegrityViolationException e) {
+            throw new ConflictException("Категория не может быть пустой!");
+        }
+        return EventMapper.toEventDto(event);
     }
 
     @Override

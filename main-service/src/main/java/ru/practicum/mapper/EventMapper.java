@@ -4,6 +4,7 @@ import lombok.experimental.UtilityClass;
 import ru.practicum.dto.event.*;
 import ru.practicum.model.Category;
 import ru.practicum.model.Event;
+import ru.practicum.model.Location;
 import ru.practicum.model.User;
 
 import java.time.LocalDateTime;
@@ -47,14 +48,14 @@ public class EventMapper {
                 .build();
     }
 
-    public static Event toEvent(User initiator, Category category, NewEventDto newEventDto) {
+    public static Event toEvent(User initiator, Category category, NewEventDto newEventDto, Location location) {
         return Event.builder()
                 .annotation(newEventDto.getAnnotation())
                 .category(category)
                 .description(newEventDto.getDescription())
                 .createdDate(LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS))
                 .eventDate(newEventDto.getEventDate())
-                .location(LocationMapper.toLocation(newEventDto.getLocation()))
+                .location(location)
                 .paid(newEventDto.getPaid() == null ? Boolean.FALSE : newEventDto.getPaid())
                 .participantLimit(newEventDto.getParticipantLimit() == null ? 0 : newEventDto.getParticipantLimit())
                 .requestModeration(newEventDto.getRequestModeration() == null ? Boolean.TRUE : newEventDto.getRequestModeration())
