@@ -16,9 +16,13 @@ import java.util.List;
 
 @Component
 public class StatsClient  {
-    private final RestTemplate rest = new RestTemplate();
-    @Value("${stats-gateway.url}")
-    private String statsUrl;
+    private final RestTemplate rest;
+    private final String statsUrl;
+
+    public StatsClient(RestTemplate rest, @Value("${stats-gateway.url}") String statsUrl) {
+        this.rest = rest;
+        this.statsUrl = statsUrl;
+    }
 
     public void createHit(EndpointHitDto statRequestDto) {
         HttpEntity<EndpointHitDto> requestEntity = new HttpEntity<>(statRequestDto);

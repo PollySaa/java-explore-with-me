@@ -1,5 +1,6 @@
 package ru.practicum.controller.adminapi;
 
+import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -20,14 +21,14 @@ public class CompilationController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public CompilationDto createCollection(@RequestBody CompilationRequest compilationRequest) {
+    public CompilationDto createCollection(@RequestBody @Valid CompilationRequest compilationRequest) {
         log.info("Выполнение createCategory");
         return compilationService.createCompilation(compilationRequest);
     }
 
     @PatchMapping("/{comp-id}")
     public CompilationDto updateCompilation(@PathVariable("comp-id") Long id,
-                                            @RequestBody CompilationRequest collectionRequest) {
+                                            @RequestBody @Valid CompilationRequest collectionRequest) {
         log.info("Выполнение updateCompilation");
         return compilationService.updateCompilation(id, collectionRequest);
     }

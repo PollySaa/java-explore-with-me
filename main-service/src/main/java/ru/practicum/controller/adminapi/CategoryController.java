@@ -1,5 +1,6 @@
 package ru.practicum.controller.adminapi;
 
+import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -20,14 +21,14 @@ public class CategoryController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public CategoryDto createCategory(@RequestBody CategoryRequest categoryRequest) {
+    public CategoryDto createCategory(@RequestBody @Valid CategoryRequest categoryRequest) {
         log.info("Выполнение createCategory");
         return categoryService.createCategory(categoryRequest);
     }
 
     @PatchMapping("/{cat-id}")
     public CategoryDto updateCategory(@PathVariable("cat-id") Long id,
-                                      @RequestBody CategoryRequest categoryRequest) {
+                                      @RequestBody @Valid CategoryRequest categoryRequest) {
         log.info("Выполнение updateCategory");
         return categoryService.updateCategory(id, categoryRequest);
     }

@@ -33,7 +33,7 @@ public class EventController {
     @PatchMapping("/{user-id}/events/{event-id}")
     public EventDto updateEvent(@PathVariable("user-id") Long id,
                                 @PathVariable("event-id") Long eventId,
-                                @RequestBody UpdateEventDto updateEventDto) {
+                                @RequestBody @Valid UpdateEventDto updateEventDto) {
         log.info("Выполнение updateEvent");
         return eventService.updateEvent(id, eventId, updateEventDto);
     }

@@ -18,7 +18,7 @@ public class CompilationRequest {
     Boolean pinned;
 
     @NotBlank
-    @Size(min = 1, max = 255)
+    @Size(min = 1, max = 50)
     String title;
 
     List<Long> events;

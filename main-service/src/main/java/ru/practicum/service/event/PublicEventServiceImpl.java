@@ -1,6 +1,7 @@
 package ru.practicum.service.event;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.data.domain.PageRequest;
@@ -13,6 +14,7 @@ import ru.practicum.ViewStatsDto;
 import ru.practicum.constants.Constants;
 import ru.practicum.dao.EventRepository;
 import ru.practicum.dto.event.EventDto;
+import ru.practicum.dto.event.EventPublic;
 import ru.practicum.dto.event.EventShortDto;
 import ru.practicum.dto.event.State;
 import ru.practicum.exceptions.ConflictException;
@@ -33,26 +35,25 @@ public class PublicEventServiceImpl implements PublicEventService {
     private final StatsClient statsClient;
 
     @Override
-    public List<EventShortDto> getEvents(String text, List<Long> categories, Boolean paid,
-                                         String rangeStart, String rangeEnd, Boolean onlyAvailable,
-                                         String sort, Integer from, Integer size, String ip,
-                                         HttpServletRequest request) {
+    public List<EventShortDto> getEvents(EventPublic eventPublic, HttpServletRequest request) {
         Pageable pageable;
-        if (sort != null) {
-            String sortField = sort.equals("EVENT_DATE") ? "eventDate" : "views";
-            pageable = PageRequest.of(from > 0 ? from / size : 0, size, Sort.by(sortField).descending());
+        if (eventPublic.getSort() != null) {
+            String sortField = eventPublic.getSort().equals("EVENT_DATE") ? "eventDate" : "views";
+            pageable = PageRequest.of(eventPublic.getFrom() > 0 ? eventPublic.getFrom() / eventPublic.getSize() : 0,
+                    eventPublic.getSize(), Sort.by(sortField).descending());
         } else {
-            pageable = PageRequest.of(from > 0 ? from / size : 0, size);
+            pageable = PageRequest.of(eventPublic.getFrom() > 0 ? eventPublic.getFrom() / eventPublic.getSize() : 0,
+                    eventPublic.getSize());
         }
 
         LocalDateTime startDate = null;
         LocalDateTime endDate = null;
 
-        if (rangeStart != null) {
-            startDate = LocalDateTime.parse(rangeStart, DateTimeFormatter.ofPattern(Constants.DATE_PATTERN));
+        if (eventPublic.getRangeStart() != null) {
+            startDate = LocalDateTime.parse(eventPublic.getRangeStart(), DateTimeFormatter.ofPattern(Constants.DATE_PATTERN));
         }
-        if (rangeEnd != null) {
-            endDate = LocalDateTime.parse(rangeEnd, DateTimeFormatter.ofPattern(Constants.DATE_PATTERN));
+        if (eventPublic.getRangeEnd() != null) {
+            endDate = LocalDateTime.parse(eventPublic.getRangeEnd(), DateTimeFormatter.ofPattern(Constants.DATE_PATTERN));
             if (endDate.isBefore(startDate) || endDate.equals(startDate)) {
                 throw new ConflictException("Даты не могут быть равны или дата окончания не может быть раньше даты начала");
             }
@@ -60,11 +61,13 @@ public class PublicEventServiceImpl implements PublicEventService {
 
         List<Event> events;
         if (endDate != null) {
-            events = eventRepository.findAllPublishedEventsByFilterAndPeriod(text, categories, paid, startDate, endDate,
-                    onlyAvailable, pageable);
+            events = eventRepository.findAllPublishedEventsByFilterAndPeriod(eventPublic.getText(),
+                    eventPublic.getCategories(), eventPublic.getPaid(), startDate, endDate,
+                    eventPublic.getOnlyAvailable(), pageable);
         } else {
-            events = eventRepository.findAllPublishedEventsByFilterAndRangeStart(text, categories, paid, startDate,
-                    onlyAvailable, pageable);
+            events = eventRepository.findAllPublishedEventsByFilterAndRangeStart(eventPublic.getText(),
+                    eventPublic.getCategories(), eventPublic.getPaid(), startDate,
+                    eventPublic.getOnlyAvailable(), pageable);
         }
 
         statsClient.createHit(createEndpointHitDto(request));
@@ -74,15 +77,13 @@ public class PublicEventServiceImpl implements PublicEventService {
     }
 
     @Override
-    public EventDto getEventByIdByPublicUser(Long id, String ip, HttpServletRequest request) {
+    public EventDto getEventByIdByPublicUser(Long id, HttpServletRequest request) {
         Event event = eventRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Событие с id = " + id + " не было найдено!"));
 
         if (!event.getState().equals(State.PUBLISHED)) {
             throw new NotFoundException("Можно смотреть только опубликованные события!");
         }
-
-        statsClient.createHit(createEndpointHitDto(request));
 
         String start = event.getCreatedOn().withNano(0).format(DateTimeFormatter.ofPattern(Constants.DATE_PATTERN));
         String end = event.getEventDate().withNano(0).format(DateTimeFormatter.ofPattern(Constants.DATE_PATTERN));
@@ -92,9 +93,12 @@ public class PublicEventServiceImpl implements PublicEventService {
             event.setViews(viewStatsDtoList.getFirst().getHits());
         }
 
+        statsClient.createHit(createEndpointHitDto(request));
+
         return EventMapper.toEventDto(eventRepository.save(event));
     }
 
+    @Transactional
     private EndpointHitDto createEndpointHitDto(HttpServletRequest request) {
         return EndpointHitDto.builder()
                 .app("ewm-main-service")

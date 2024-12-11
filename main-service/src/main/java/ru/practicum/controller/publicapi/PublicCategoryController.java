@@ -19,7 +19,8 @@ public class PublicCategoryController {
     PublicCategoryService publicCategoryService;
 
     @GetMapping
-    public List<CategoryDto> getCategoriesByPublicUser(@RequestParam Integer from, @RequestParam Integer size) {
+    public List<CategoryDto> getCategoriesByPublicUser(@RequestParam(defaultValue = "0") Integer from,
+                                                       @RequestParam(defaultValue = "10") Integer size) {
         log.info("Выполнение getCategoriesByPublicUser");
         return publicCategoryService.getCategoriesByPublicUser(from, size);
     }
