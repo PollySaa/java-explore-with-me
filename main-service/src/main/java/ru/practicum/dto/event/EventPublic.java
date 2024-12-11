@@ -19,10 +19,10 @@ public class EventPublic {
     Boolean paid;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = Constants.DATE_PATTERN)
-    String RangeStart;
+    String rangeStart;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = Constants.DATE_PATTERN)
-    String RangeEnd;
+    String rangeEnd;
 
     Boolean onlyAvailable;
 
