@@ -13,11 +13,10 @@ import ru.practicum.ViewStatsDto;
 import ru.practicum.constants.Constants;
 import ru.practicum.dao.EventRepository;
 import ru.practicum.dto.event.EventDto;
-import ru.practicum.dto.event.EventPublic;
 import ru.practicum.dto.event.EventShortDto;
 import ru.practicum.dto.event.State;
+import ru.practicum.exceptions.ConflictException;
 import ru.practicum.exceptions.NotFoundException;
-import ru.practicum.exceptions.ValidationException;
 import ru.practicum.mapper.EventMapper;
 import ru.practicum.model.Event;
 import ru.practicum.stats.StatsClient;
@@ -34,37 +33,38 @@ public class PublicEventServiceImpl implements PublicEventService {
     private final StatsClient statsClient;
 
     @Override
-    public List<EventShortDto> getEvents(EventPublic eventPublic, HttpServletRequest request) {
+    public List<EventShortDto> getEvents(String text, List<Long> categories, Boolean paid,
+                                         String rangeStart, String rangeEnd, Boolean onlyAvailable,
+                                         String sort, Integer from, Integer size, String ip,
+                                         HttpServletRequest request) {
         Pageable pageable;
-        if (eventPublic.getSort() != null) {
-            String sortField = eventPublic.getSort().equals("EVENT_DATE") ? "eventDate" : "views";
-            pageable = PageRequest.of(eventPublic.getFrom() > 0 ? eventPublic.getFrom() / eventPublic.getSize() : 0, eventPublic.getSize(), Sort.by(sortField).descending());
+        if (sort != null) {
+            String sortField = sort.equals("EVENT_DATE") ? "eventDate" : "views";
+            pageable = PageRequest.of(from > 0 ? from / size : 0, size, Sort.by(sortField).descending());
         } else {
-            pageable = PageRequest.of(eventPublic.getFrom() > 0 ? eventPublic.getFrom() / eventPublic.getSize() : 0, eventPublic.getSize());
+            pageable = PageRequest.of(from > 0 ? from / size : 0, size);
         }
 
         LocalDateTime startDate = null;
         LocalDateTime endDate = null;
 
-        if (eventPublic.getStart() != null) {
-            startDate = LocalDateTime.parse(eventPublic.getStart(), DateTimeFormatter.ofPattern(Constants.DATE_PATTERN));
+        if (rangeStart != null) {
+            startDate = LocalDateTime.parse(rangeStart, DateTimeFormatter.ofPattern(Constants.DATE_PATTERN));
         }
-        if (eventPublic.getEnd() != null) {
-            endDate = LocalDateTime.parse(eventPublic.getEnd(), DateTimeFormatter.ofPattern(Constants.DATE_PATTERN));
+        if (rangeEnd != null) {
+            endDate = LocalDateTime.parse(rangeEnd, DateTimeFormatter.ofPattern(Constants.DATE_PATTERN));
             if (endDate.isBefore(startDate) || endDate.equals(startDate)) {
-                throw new ValidationException("Даты не могут быть равны или дата окончания не может быть раньше даты начала");
+                throw new ConflictException("Даты не могут быть равны или дата окончания не может быть раньше даты начала");
             }
         }
 
         List<Event> events;
         if (endDate != null) {
-            events = eventRepository.findAllPublishedEventsByFilterAndPeriod(eventPublic.getText(),
-                    eventPublic.getCategories(), eventPublic.getPaid(), startDate, endDate,
-                    eventPublic.getOnlyAvailable(), pageable);
+            events = eventRepository.findAllPublishedEventsByFilterAndPeriod(text, categories, paid, startDate, endDate,
+                    onlyAvailable, pageable);
         } else {
-            events = eventRepository.findAllPublishedEventsByFilterAndStart(eventPublic.getText(),
-                    eventPublic.getCategories(), eventPublic.getPaid(), startDate, eventPublic.getOnlyAvailable(),
-                    pageable);
+            events = eventRepository.findAllPublishedEventsByFilterAndRangeStart(text, categories, paid, startDate,
+                    onlyAvailable, pageable);
         }
 
         statsClient.createHit(createEndpointHitDto(request));

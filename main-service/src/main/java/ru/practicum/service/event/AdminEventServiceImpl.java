@@ -6,25 +6,25 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import ru.practicum.constants.Constants;
 import ru.practicum.dao.CategoryRepository;
 import ru.practicum.dao.EventRepository;
-import ru.practicum.dto.event.EventAdmin;
+import ru.practicum.dao.LocationRepository;
 import ru.practicum.dto.event.EventDto;
 import ru.practicum.dto.event.State;
 import ru.practicum.dto.event.UpdateEventDto;
+import ru.practicum.dto.location.LocationDto;
 import ru.practicum.exceptions.ConflictException;
 import ru.practicum.exceptions.NotFoundException;
 import ru.practicum.mapper.EventMapper;
+import ru.practicum.mapper.LocationMapper;
 import ru.practicum.model.Category;
 import ru.practicum.model.Event;
+import ru.practicum.model.Location;
 
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 @Service
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
@@ -32,36 +32,37 @@ import java.util.stream.Collectors;
 public class AdminEventServiceImpl implements AdminEventService {
     EventRepository eventRepository;
     CategoryRepository categoryRepository;
+    LocationRepository locationRepository;
 
     @Override
-    public List<EventDto> getEventsWithParam(EventAdmin eventAdmin) {
+    public List<EventDto> getEventsWithParam(List<Long> users, List<State> states, List<Long> categories,
+                                             String rangeStart, String rangeEnd, Integer from, Integer size) {
+        Pageable pageable = PageRequest.of(from > 0 ? from / size : 0, size);
         LocalDateTime start = null;
         LocalDateTime end = null;
 
-        if (Objects.nonNull(eventAdmin.getRangeStart())) {
-            start = LocalDateTime.parse(eventAdmin.getRangeStart(), DateTimeFormatter.ofPattern(Constants.DATE_PATTERN));
+        if (rangeStart != null) {
+            start = LocalDateTime.parse(URLDecoder.decode(rangeStart, StandardCharsets.UTF_8));
         }
-        if (Objects.nonNull(eventAdmin.getRangeEnd())) {
-            end = LocalDateTime.parse(eventAdmin.getRangeEnd(), DateTimeFormatter.ofPattern(Constants.DATE_PATTERN));
+        if (rangeEnd != null) {
+            end = LocalDateTime.parse(URLDecoder.decode(rangeEnd, StandardCharsets.UTF_8));
         }
-
-        Pageable pageable = PageRequest.of(eventAdmin.getFrom() / eventAdmin.getSize(), eventAdmin.getSize());
-
         List<Event> events;
-        if (eventAdmin.getUsers() != null || eventAdmin.getStates() != null || eventAdmin.getCategories() != null || start != null || end != null) {
-            events = eventRepository.findAllByParams(
-                    eventAdmin.getUsers(),
-                    eventAdmin.getStates(),
-                    eventAdmin.getCategories(),
-                    start,
-                    end,
-                    pageable
-            );
+        if (start != null && end != null) {
+            if (end.isBefore(start) || end.equals(start)) {
+                throw new ConflictException("Даты не могут быть равны или дата окончания не может быть раньше даты начала");
+            }
+            events = eventRepository.findAllEventsByFilterAndPeriod(users, states, categories, start, end, pageable);
+        } else if (start != null) {
+            events = eventRepository.findAllEventsByFilterAndRangeStart(users, states, categories, start, pageable);
+        } else if (end != null) {
+            events = eventRepository.findAllEventsByFilterAndRangeEnd(users, states, categories, end, pageable);
         } else {
-            events = eventRepository.findAllEvents(pageable);
+            events = eventRepository.findAllByParams(users, states, categories, pageable);
         }
-
-        return events != null ? events.stream().map(EventMapper::toEventDto).collect(Collectors.toList()) : Collections.emptyList();
+        return events.stream()
+                .map(EventMapper::toEventDto)
+                .toList();
     }
 
     @Override
@@ -83,6 +84,15 @@ public class AdminEventServiceImpl implements AdminEventService {
         Category category = updateEventDto.getCategory() == null ? event.getCategory()
                 : categoryRepository.findById(updateEventDto.getCategory())
                 .orElseThrow(() -> new NotFoundException("Категория с id = " + updateEventDto.getCategory() + " не была найдена!"));
+
+        if (updateEventDto.getLocation() != null) {
+            LocationDto locationDto = updateEventDto.getLocation();
+            Location location = LocationMapper.toLocation(locationDto);
+            if (location.getId() == null) {
+                location = locationRepository.save(location);
+            }
+            event.setLocation(location);
+        }
 
         event = eventRepository.save(EventMapper.toUpdatedEvent(updateEventDto, category, event));
         return EventMapper.toEventDto(event);

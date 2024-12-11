@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 @AllArgsConstructor
 public class CompilationServiceImpl implements CompilationService {
-    CompilationRepository collectionRepository;
+    CompilationRepository compilationRepository;
     EventRepository eventRepository;
 
     @Override
@@ -33,13 +33,13 @@ public class CompilationServiceImpl implements CompilationService {
                 .collect(Collectors.toSet());
 
         Compilation newCollection = CompilationMapper.toCompilation(collectionRequest, events);
-        Compilation savedCollection = collectionRepository.save(newCollection);
+        Compilation savedCollection = compilationRepository.save(newCollection);
         return CompilationMapper.toCompilationDto(savedCollection);
     }
 
     @Override
     public CompilationDto updateCompilation(Long id, CompilationRequest collectionRequest) {
-        Compilation existingCollection = collectionRepository.findById(id)
+        Compilation existingCollection = compilationRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Собрание с id = " + id + " не было найдено!"));
 
         Set<Event> newEvents = collectionRequest.getEvents().stream()
@@ -49,16 +49,16 @@ public class CompilationServiceImpl implements CompilationService {
                 .collect(Collectors.toSet());
 
         Compilation updatedCollection = CompilationMapper.toUpdateCompilation(collectionRequest, existingCollection, newEvents);
-        Compilation savedCollection = collectionRepository.save(updatedCollection);
+        Compilation savedCollection = compilationRepository.save(updatedCollection);
         return CompilationMapper.toCompilationDto(savedCollection);
     }
 
     @Override
     public void deleteCompilation(Long id) {
-        if (!collectionRepository.existsById(id)) {
+        if (!compilationRepository.existsById(id)) {
             throw new NotFoundException("Собрание с id = " + id + " не было найдено!");
         }
 
-        collectionRepository.deleteById(id);
+        compilationRepository.deleteById(id);
     }
 }

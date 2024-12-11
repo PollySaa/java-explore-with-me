@@ -9,6 +9,7 @@ import ru.practicum.model.Request;
 import ru.practicum.model.User;
 
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 @UtilityClass
@@ -28,7 +29,7 @@ public class RequestMapper {
         return Request.builder()
                 .event(event)
                 .requester(requester)
-                .created(LocalDateTime.now())
+                .created(LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS))
                 .status(event.getRequestModeration() ? Status.PENDING : Status.CONFIRMED)
                 .build();
     }

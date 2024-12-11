@@ -32,6 +32,10 @@ public class RequestServiceImpl implements RequestService {
 
     @Override
     public RequestDto createRequest(Long id, Long eventId) {
+        if (eventId == null) {
+            throw new ValidationException("eventId не может быть null");
+        }
+
         if (requestRepository.existsByRequesterIdAndEventId(id, eventId)) {
             throw new ConflictException("Нельзя создавать одинаковый запрос на уже существующее событие!");
         }
@@ -78,7 +82,7 @@ public class RequestServiceImpl implements RequestService {
     public List<ResultRequestStatusDto> getRequestsByUserId(Long id) {
         getUserById(id);
         List<Request> requests = requestRepository.findAllByRequesterId(id, Sort.by(Sort.Direction.DESC,
-                "createdOn"));
+                "created"));
         return List.of(RequestMapper.toRequest(requests));
     }
 

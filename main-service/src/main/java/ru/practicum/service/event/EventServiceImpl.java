@@ -38,17 +38,17 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public EventDto createEvent(Long id, NewEventDto newEventDto) {
+        checkDateTime(newEventDto.getEventDate());
         Event event;
         Category category = getCategoryById(newEventDto.getCategory());
         User user = getUserById(id);
         Location location = locationRepository.save(LocationMapper.toLocation(newEventDto.getLocation()));
-        checkDateTime(newEventDto.getEventDate());
         event = EventMapper.toEvent(user, category, newEventDto, location);
         event.setState(State.PENDING);
         try {
             event = eventRepository.save(event);
         } catch (DataIntegrityViolationException e) {
-            throw new ConflictException("Категория не может быть пустой!");
+            throw new ValidationException("Категория не может быть пустой!");
         }
         return EventMapper.toEventDto(event);
     }
@@ -104,7 +104,7 @@ public class EventServiceImpl implements EventService {
         }
 
         List<Request> requests = requestRepository.findRequestsByEventId(eventId, Sort.by(Sort.Direction.DESC,
-                "createdOn"));
+                "created"));
         return requests.stream()
                 .map(RequestMapper::toRequestDto)
                 .collect(Collectors.toList());
@@ -206,8 +206,11 @@ public class EventServiceImpl implements EventService {
     }
 
     private void checkDateTime(LocalDateTime eventDate) {
-        if (eventDate.isBefore(LocalDateTime.now().plusHours(2))) {
-            throw new ValidationException("Дата события должна быть не раньше, чем через два часа от текущего времени.");
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime minAllowedDateTime = now.plusHours(2);
+
+        if (eventDate.isBefore(minAllowedDateTime)) {
+            throw new ValidationException("Дата и время события должны быть не раньше, чем через два часа от текущего момента.");
         }
     }
 }

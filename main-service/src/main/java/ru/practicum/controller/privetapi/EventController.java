@@ -1,5 +1,6 @@
 package ru.practicum.controller.privetapi;
 
+import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -24,7 +25,7 @@ public class EventController {
     @PostMapping("/{user-id}/events")
     @ResponseStatus(HttpStatus.CREATED)
     public EventDto createEvent(@PathVariable("user-id") Long id,
-                                @RequestBody NewEventDto newEventDto) {
+                                @RequestBody @Valid NewEventDto newEventDto) {
         log.info("Выполнение createEvent");
         return eventService.createEvent(id, newEventDto);
     }
@@ -46,8 +47,8 @@ public class EventController {
 
     @GetMapping("/{user-id}/events")
     public List<EventShortDto> getEventsByUserId(@PathVariable("user-id") Long userId,
-                                                 @RequestParam Integer from,
-                                                 @RequestParam Integer size) {
+                                                 @RequestParam(defaultValue = "0") Integer from,
+                                                 @RequestParam(defaultValue = "10") Integer size) {
         log.info("Выполнение getEventsByUserId");
         return eventService.getEventsByUserId(userId, from, size);
     }
