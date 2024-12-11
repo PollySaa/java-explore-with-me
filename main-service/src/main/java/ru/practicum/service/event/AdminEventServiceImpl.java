@@ -38,11 +38,11 @@ public class AdminEventServiceImpl implements AdminEventService {
         LocalDateTime start = null;
         LocalDateTime end = null;
 
-        if (Objects.nonNull(eventAdmin.getStart())) {
-            start = LocalDateTime.parse(eventAdmin.getStart(), DateTimeFormatter.ofPattern(Constants.DATE_PATTERN));
+        if (Objects.nonNull(eventAdmin.getRangeStart())) {
+            start = LocalDateTime.parse(eventAdmin.getRangeStart(), DateTimeFormatter.ofPattern(Constants.DATE_PATTERN));
         }
-        if (Objects.nonNull(eventAdmin.getEnd())) {
-            end = LocalDateTime.parse(eventAdmin.getEnd(), DateTimeFormatter.ofPattern(Constants.DATE_PATTERN));
+        if (Objects.nonNull(eventAdmin.getRangeEnd())) {
+            end = LocalDateTime.parse(eventAdmin.getRangeEnd(), DateTimeFormatter.ofPattern(Constants.DATE_PATTERN));
         }
 
         Pageable pageable = PageRequest.of(eventAdmin.getFrom() / eventAdmin.getSize(), eventAdmin.getSize());

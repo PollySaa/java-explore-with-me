@@ -18,16 +18,16 @@ import java.util.List;
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 @AllArgsConstructor
 public class PublicCompilationServiceImpl implements PublicCompilationService {
-    CompilationRepository collectionRepository;
+    CompilationRepository compilationRepository;
 
     @Override
     public List<CompilationDto> getCompilationsByPublicUser(Boolean pinned, Integer from, Integer size) {
         Pageable pageable = PageRequest.of(from, size);
         List<Compilation> compilations;
         if (pinned == null) {
-            compilations = collectionRepository.findAll(pageable).getContent();
+            compilations = compilationRepository.findAll(pageable).getContent();
         } else {
-            compilations = collectionRepository.findCompilationsByPinned(pinned, pageable);
+            compilations = compilationRepository.findCompilationsByPinned(pinned, pageable);
         }
 
         return compilations.stream()
@@ -37,7 +37,7 @@ public class PublicCompilationServiceImpl implements PublicCompilationService {
 
     @Override
     public CompilationDto getCompilationByIdByPublicUser(Long id) {
-        Compilation compilation = collectionRepository.findById(id)
+        Compilation compilation = compilationRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Собрание с id = " + id + " не было найдено!"));
 
         return CompilationMapper.toCompilationDto(compilation);

@@ -29,6 +29,7 @@ public class Request {
     @JoinColumn(name = "requester_id")
     User requester;
 
+    @Column(name = "created")
     LocalDateTime created;
 
     Status status;

@@ -13,20 +13,20 @@ public class CompilationMapper {
 
     public static CompilationDto toCompilationDto(Compilation collection) {
         return CompilationDto.builder()
+                .id(collection.getId())
+                .title(collection.getTitle())
+                .pinned(collection.getPinned())
                 .events(collection.getEvents().stream()
                         .map(EventMapper::toEventShortDto)
                         .toList())
-                .id(collection.getId())
-                .pinned(collection.getPinned())
-                .title(collection.getTitle())
                 .build();
     }
 
     public static Compilation toCompilation(CompilationRequest compilationRequest, Set<Event> events) {
         return Compilation.builder()
                 .events(events)
-                .pinned(compilationRequest.getPinned() == null ? Boolean.FALSE : compilationRequest.getPinned())
                 .title(compilationRequest.getTitle())
+                .pinned(compilationRequest.getPinned() == null ? Boolean.FALSE : compilationRequest.getPinned())
                 .build();
     }
 

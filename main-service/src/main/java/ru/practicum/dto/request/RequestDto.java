@@ -15,6 +15,6 @@ public class RequestDto {
     Long id;
     Long event;
     Long requester;
-    LocalDateTime createdOn;
+    LocalDateTime created;
     Status status;
 }

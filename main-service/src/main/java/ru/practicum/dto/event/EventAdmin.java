@@ -17,10 +17,10 @@ import java.util.List;
 public class EventAdmin {
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = Constants.DATE_PATTERN)
-    String start;
+    String rangeStart;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = Constants.DATE_PATTERN)
-    String end;
+    String rangeEnd;
 
     @Min(0)
     Integer from = 0;
@@ -30,7 +30,7 @@ public class EventAdmin {
 
     List<Long> users;
 
-    List<State> states;
-
     List<Long> categories;
+
+    List<State> states;
 }

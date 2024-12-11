@@ -111,8 +111,7 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public ResultRequestStatusDto approveRequestByOwnerId(Long ownerId, Long eventId,
-                                                               EventRequestStatus eventRequestStatus) {
+    public ResultRequestStatusDto approveRequestByOwnerId(Long ownerId, Long eventId, EventRequestStatus eventRequestStatus) {
         checkExistUser(ownerId);
         Event event = getEventById(eventId);
 
@@ -121,12 +120,29 @@ public class EventServiceImpl implements EventService {
         }
 
         List<Request> requests = requestRepository.findAllById(eventRequestStatus.getRequestIds());
+        for (Request request : requests) {
+            if (!request.getStatus().equals(Status.PENDING)) {
+                throw new ConflictException("Статус можно изменить только у заявок, находящихся в состоянии ожидания!");
+            }
+        }
+
         List<Request> confirmedRequests = new ArrayList<>();
         List<Request> rejectedRequests = new ArrayList<>();
 
         for (Request request : requests) {
             if (!request.getEvent().getId().equals(eventId)) {
                 throw new ConflictException("Запрос с id = " + request.getId() + " не относится к событию с id = " + eventId);
+            }
+
+            if (!event.getParticipantLimit().equals(0) && event.getConfirmedRequests().equals(event.getParticipantLimit())) {
+                throw new ConflictException("Достигнут лимит запросов!");
+            }
+
+            if (event.getParticipantLimit().equals(0) || !event.getRequestModeration()) {
+                request.setStatus(Status.CONFIRMED);
+                event.setConfirmedRequests(event.getConfirmedRequests() + 1);
+                confirmedRequests.add(request);
+                continue;
             }
 
             if (eventRequestStatus.getStatus().equals("CONFIRMED")) {
@@ -143,6 +159,15 @@ public class EventServiceImpl implements EventService {
                 rejectedRequests.add(request);
             } else {
                 throw new ConflictException("Неподдерживаемый статус: " + eventRequestStatus.getStatus());
+            }
+        }
+
+        if (event.getConfirmedRequests().equals(event.getParticipantLimit())) {
+            for (Request request : requests) {
+                if (request.getStatus().equals(Status.PENDING)) {
+                    request.setStatus(Status.REJECTED);
+                    rejectedRequests.add(request);
+                }
             }
         }
 
