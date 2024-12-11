@@ -21,7 +21,7 @@ public class CompilationController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public CompilationDto createCollection(@RequestBody @Valid CompilationRequest compilationRequest) {
+    public CompilationDto createCompilation(@RequestBody @Valid CompilationRequest compilationRequest) {
         log.info("Выполнение createCategory");
         return compilationService.createCompilation(compilationRequest);
     }

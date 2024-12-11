@@ -17,7 +17,7 @@ import ru.practicum.dto.event.EventDto;
 import ru.practicum.dto.event.EventPublic;
 import ru.practicum.dto.event.EventShortDto;
 import ru.practicum.dto.event.State;
-import ru.practicum.exceptions.ConflictException;
+import ru.practicum.exceptions.IncorrectParameterException;
 import ru.practicum.exceptions.NotFoundException;
 import ru.practicum.mapper.EventMapper;
 import ru.practicum.model.Event;
@@ -55,7 +55,7 @@ public class PublicEventServiceImpl implements PublicEventService {
         if (eventPublic.getRangeEnd() != null) {
             endDate = LocalDateTime.parse(eventPublic.getRangeEnd(), DateTimeFormatter.ofPattern(Constants.DATE_PATTERN));
             if (endDate.isBefore(startDate) || endDate.equals(startDate)) {
-                throw new ConflictException("Даты не могут быть равны или дата окончания не может быть раньше даты начала");
+                throw new IncorrectParameterException("Даты не могут быть равны или дата окончания не может быть раньше даты начала");
             }
         }
 
