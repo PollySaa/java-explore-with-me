@@ -20,6 +20,7 @@ import ru.practicum.model.Event;
 import ru.practicum.model.Request;
 import ru.practicum.model.User;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -50,12 +51,12 @@ public class RequestServiceImpl implements RequestService {
             throw new ConflictException("Событие должно быть опубликованно!");
         }
 
-        if (!event.getParticipantLimit().equals(0) && event.getConfirmedRequests().equals(event.getParticipantLimit())) {
+        if (event.getParticipantLimit() != 0 && event.getConfirmedRequests() >= event.getParticipantLimit()) {
             throw new ConflictException("Достигнут лимит запросов!");
         }
 
         Request request = RequestMapper.toRequest(event, user);
-        if (event.getParticipantLimit().equals(0) || (!event.getParticipantLimit().equals(0) && !event.getRequestModeration())) {
+        if (event.getParticipantLimit() == 0 || !event.getRequestModeration()) {
             request.setStatus(Status.CONFIRMED);
             event.setConfirmedRequests(event.getConfirmedRequests() + 1);
             eventRepository.save(event);
@@ -68,11 +69,11 @@ public class RequestServiceImpl implements RequestService {
         getUserById(id);
         Request request = getRequestById(requestId);
         if (request.getStatus().equals(Status.CANCELED)) {
-            throw new ValidationException("Событие отменено.");
+            throw new ValidationException("Событие уже отменено.");
         }
 
         if (!id.equals(request.getRequester().getId())) {
-            throw new ValidationException("Событие может отменять только создаель запроса.");
+            throw new ValidationException("Событие может отменять только создатель запроса.");
         }
         request.setStatus(Status.CANCELED);
         return RequestMapper.toRequestDto(requestRepository.save(request));
@@ -83,7 +84,7 @@ public class RequestServiceImpl implements RequestService {
         getUserById(id);
         List<Request> requests = requestRepository.findAllByRequesterId(id, Sort.by(Sort.Direction.DESC,
                 "created"));
-        return List.of(RequestMapper.toRequest(requests));
+        return new ArrayList<>(List.of(RequestMapper.toRequest(requests)));
     }
 
     private User getUserById(Long id) {

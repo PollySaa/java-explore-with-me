@@ -87,7 +87,7 @@ public class EventServiceImpl implements EventService {
     @Override
     public List<EventShortDto> getEventsByUserId(Long userId, Integer from, Integer size) {
         checkExistUser(userId);
-        Pageable pageable = PageRequest.of(from / size, size);
+        Pageable pageable = PageRequest.of(from > 0 ? from / size : 0, size);
         List<Event> events = eventRepository.findByInitiatorId(userId, pageable);
         return events.stream()
                 .map(EventMapper::toEventShortDto)

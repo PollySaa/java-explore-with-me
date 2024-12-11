@@ -26,11 +26,11 @@ public class PublicEventController {
                                          @RequestParam(required = false) Boolean paid,
                                          @RequestParam(required = false) String rangeStart,
                                          @RequestParam(required = false) String rangeEnd,
-                                         @RequestParam Boolean onlyAvailable,
+                                         @RequestParam(required = false) Boolean onlyAvailable,
                                          @RequestParam(required = false) String sort,
                                          @RequestParam Integer from,
                                          @RequestParam Integer size,
-                                         @RequestHeader("X-Forwarded-For") String ip,
+                                         @RequestHeader(value = "X-Forwarded-For", required = false) String ip,
                                          HttpServletRequest request) {
         log.info("Выполнение getEvents");
         return publicEventService.getEvents(text, categories, paid, rangeStart, rangeEnd,
@@ -39,7 +39,7 @@ public class PublicEventController {
 
     @GetMapping("/{event-id}")
     public EventDto getEventByIdByPublicUser(@PathVariable("event-id") Long id,
-                                             @RequestHeader("X-Forwarded-For") String ip,
+                                             @RequestHeader(value = "X-Forwarded-For", required = false) String ip,
                                              HttpServletRequest request) {
         log.info("Выполнение getEventByIdByPublicUser");
         return publicEventService.getEventByIdByPublicUser(id, ip, request);

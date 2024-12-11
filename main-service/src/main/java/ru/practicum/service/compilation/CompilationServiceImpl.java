@@ -13,6 +13,8 @@ import ru.practicum.mapper.CompilationMapper;
 import ru.practicum.model.Compilation;
 import ru.practicum.model.Event;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -25,32 +27,40 @@ public class CompilationServiceImpl implements CompilationService {
     EventRepository eventRepository;
 
     @Override
-    public CompilationDto createCompilation(CompilationRequest collectionRequest) {
-        Set<Event> events = collectionRequest.getEvents().stream()
+    public CompilationDto createCompilation(CompilationRequest compilationRequest) {
+        List<Long> eventIds = compilationRequest.getEvents() != null
+                ? compilationRequest.getEvents()
+                : Collections.emptyList();
+
+        Set<Event> events = eventIds.stream()
                 .map(eventRepository::findById)
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .collect(Collectors.toSet());
 
-        Compilation newCollection = CompilationMapper.toCompilation(collectionRequest, events);
-        Compilation savedCollection = compilationRepository.save(newCollection);
-        return CompilationMapper.toCompilationDto(savedCollection);
+        Compilation newCompilation = CompilationMapper.toCompilation(compilationRequest, events);
+        Compilation savedCompilation = compilationRepository.save(newCompilation);
+        return CompilationMapper.toCompilationDto(savedCompilation);
     }
 
     @Override
-    public CompilationDto updateCompilation(Long id, CompilationRequest collectionRequest) {
-        Compilation existingCollection = compilationRepository.findById(id)
+    public CompilationDto updateCompilation(Long id, CompilationRequest compilationRequest) {
+        Compilation existingCompilation = compilationRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Собрание с id = " + id + " не было найдено!"));
 
-        Set<Event> newEvents = collectionRequest.getEvents().stream()
+        List<Long> eventIds = compilationRequest.getEvents() != null
+                ? compilationRequest.getEvents()
+                : Collections.emptyList();
+
+        Set<Event> newEvents = eventIds.stream()
                 .map(eventRepository::findById)
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .collect(Collectors.toSet());
 
-        Compilation updatedCollection = CompilationMapper.toUpdateCompilation(collectionRequest, existingCollection, newEvents);
-        Compilation savedCollection = compilationRepository.save(updatedCollection);
-        return CompilationMapper.toCompilationDto(savedCollection);
+        Compilation updatedCompilation = CompilationMapper.toUpdateCompilation(compilationRequest, existingCompilation, newEvents);
+        Compilation savedCompilation = compilationRepository.save(updatedCompilation);
+        return CompilationMapper.toCompilationDto(savedCompilation);
     }
 
     @Override

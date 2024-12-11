@@ -20,8 +20,8 @@ public class PublicCompilationController {
 
     @GetMapping
     public List<CompilationDto> getCompilationsByPublicUser(@RequestParam(required = false) Boolean pinned,
-                                                            @RequestParam Integer from,
-                                                            @RequestParam Integer size) {
+                                                            @RequestParam(defaultValue = "0") Integer from,
+                                                            @RequestParam(defaultValue = "10") Integer size) {
         log.info("Выполнение getCompilationsByPublicUser");
         return publicCompilationService.getCompilationsByPublicUser(pinned, from, size);
     }

@@ -25,7 +25,7 @@ public class CompilationController {
         return compilationService.createCompilation(compilationRequest);
     }
 
-    @PutMapping("/{comp-id}")
+    @PatchMapping("/{comp-id}")
     public CompilationDto updateCompilation(@PathVariable("comp-id") Long id,
                                             @RequestBody CompilationRequest collectionRequest) {
         log.info("Выполнение updateCompilation");

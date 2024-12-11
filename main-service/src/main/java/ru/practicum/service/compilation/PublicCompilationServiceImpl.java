@@ -12,6 +12,7 @@ import ru.practicum.exceptions.NotFoundException;
 import ru.practicum.mapper.CompilationMapper;
 import ru.practicum.model.Compilation;
 
+import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -22,12 +23,16 @@ public class PublicCompilationServiceImpl implements PublicCompilationService {
 
     @Override
     public List<CompilationDto> getCompilationsByPublicUser(Boolean pinned, Integer from, Integer size) {
-        Pageable pageable = PageRequest.of(from, size);
+        Pageable pageable = PageRequest.of(from > 0 ? from / size : 0, size);
         List<Compilation> compilations;
         if (pinned == null) {
             compilations = compilationRepository.findAll(pageable).getContent();
         } else {
             compilations = compilationRepository.findCompilationsByPinned(pinned, pageable);
+        }
+
+        if (compilations == null) {
+            compilations = Collections.emptyList();
         }
 
         return compilations.stream()
