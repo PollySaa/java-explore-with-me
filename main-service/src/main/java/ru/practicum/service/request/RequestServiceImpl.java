@@ -13,8 +13,8 @@ import ru.practicum.dto.request.RequestDto;
 import ru.practicum.dto.request.ResultRequestStatusDto;
 import ru.practicum.dto.request.Status;
 import ru.practicum.exceptions.ConflictException;
+import ru.practicum.exceptions.IncorrectParameterException;
 import ru.practicum.exceptions.NotFoundException;
-import ru.practicum.exceptions.ValidationException;
 import ru.practicum.mapper.RequestMapper;
 import ru.practicum.model.Event;
 import ru.practicum.model.Request;
@@ -34,7 +34,7 @@ public class RequestServiceImpl implements RequestService {
     @Override
     public RequestDto createRequest(Long id, Long eventId) {
         if (eventId == null) {
-            throw new ValidationException("eventId не может быть null");
+            throw new IncorrectParameterException("eventId не может быть null");
         }
 
         if (requestRepository.existsByRequesterIdAndEventId(id, eventId)) {
@@ -69,11 +69,11 @@ public class RequestServiceImpl implements RequestService {
         getUserById(id);
         Request request = getRequestById(requestId);
         if (request.getStatus().equals(Status.CANCELED)) {
-            throw new ValidationException("Событие уже отменено.");
+            throw new IncorrectParameterException("Событие уже отменено.");
         }
 
         if (!id.equals(request.getRequester().getId())) {
-            throw new ValidationException("Событие может отменять только создатель запроса.");
+            throw new IncorrectParameterException("Событие может отменять только создатель запроса.");
         }
         request.setStatus(Status.CANCELED);
         return RequestMapper.toRequestDto(requestRepository.save(request));

@@ -14,8 +14,8 @@ import ru.practicum.dto.request.RequestDto;
 import ru.practicum.dto.request.ResultRequestStatusDto;
 import ru.practicum.dto.request.Status;
 import ru.practicum.exceptions.ConflictException;
+import ru.practicum.exceptions.IncorrectParameterException;
 import ru.practicum.exceptions.NotFoundException;
-import ru.practicum.exceptions.ValidationException;
 import ru.practicum.mapper.EventMapper;
 import ru.practicum.mapper.LocationMapper;
 import ru.practicum.mapper.RequestMapper;
@@ -48,7 +48,7 @@ public class EventServiceImpl implements EventService {
         try {
             event = eventRepository.save(event);
         } catch (DataIntegrityViolationException e) {
-            throw new ValidationException("Категория не может быть пустой!");
+            throw new IncorrectParameterException("Категория не может быть пустой!");
         }
         return EventMapper.toEventDto(event);
     }
@@ -100,7 +100,7 @@ public class EventServiceImpl implements EventService {
         Event event = getEventById(eventId);
 
         if (!event.getInitiator().getId().equals(ownerId)) {
-            throw new ValidationException("Информацию о запросах на участие может смотреть только организатор события!");
+            throw new IncorrectParameterException("Информацию о запросах на участие может смотреть только организатор события!");
         }
 
         List<Request> requests = requestRepository.findRequestsByEventId(eventId, Sort.by(Sort.Direction.DESC,
@@ -210,7 +210,7 @@ public class EventServiceImpl implements EventService {
         LocalDateTime minAllowedDateTime = now.plusHours(2);
 
         if (eventDate.isBefore(minAllowedDateTime)) {
-            throw new ValidationException("Дата и время события должны быть не раньше, чем через два часа от текущего момента.");
+            throw new IncorrectParameterException("Дата и время события должны быть не раньше, чем через два часа от текущего момента.");
         }
     }
 }
