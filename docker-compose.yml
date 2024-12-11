@@ -32,7 +32,7 @@ services:
       - ewm-db
     environment:
       - GATEWAY_URL=http://stats-server:9090
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://ewm-db:5432/ewm
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://ewm-db:5433/ewm
       - SPRING_DATASOURCE_USERNAME=postgres
       - SPRING_DATASOURCE_PASSWORD=user
       - SPRING_DRIVER_CLASS_NAME=org.postgresql.Driver
