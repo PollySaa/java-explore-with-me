@@ -22,51 +22,41 @@ import ru.practicum.mapper.EventMapper;
 import ru.practicum.model.Event;
 import ru.practicum.stats.StatsClient;
 
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
-@Service
 @ComponentScan
+@Service
 @RequiredArgsConstructor
 public class PublicEventServiceImpl implements PublicEventService {
     private final EventRepository eventRepository;
     private final StatsClient statsClient;
 
     @Override
-    public List<EventShortDto> getEvents(LocalDateTime rangeStart, LocalDateTime rangeEnd, String text,
-                                         List<Long> categories, Boolean paid, Boolean onlyAvailable, String sort,
-                                         Integer from, Integer size, HttpServletRequest request) {
+    public List<EventShortDto> getEvents(
+            LocalDateTime rangeStart, LocalDateTime rangeEnd, String text, List<Long> categories, Boolean paid,
+            Boolean onlyAvailable, String sort, Integer from, Integer size, HttpServletRequest request) {
+
+        if (rangeStart != null && rangeEnd != null && rangeEnd.isBefore(rangeStart)) {
+            throw new IncorrectParameterException("Даты не могут быть равны или дата окончания не может быть раньше даты начала");
+        }
+
         Pageable pageable;
         if (sort != null) {
             String sortField = sort.equals("EVENT_DATE") ? "eventDate" : "views";
-            pageable = PageRequest.of(from > 0 ? from / size : 0, size, Sort.by(sortField).descending());
+            pageable = PageRequest.of(from / size, size, Sort.by(sortField).descending());
         } else {
-            pageable = PageRequest.of(from > 0 ? from / size : 0, size);
-        }
-
-        LocalDateTime startDate = null;
-        LocalDateTime endDate = null;
-
-        if (rangeStart != null) {
-            startDate = LocalDateTime.parse(URLDecoder.decode(rangeStart.toString(), StandardCharsets.UTF_8));
-        }
-        if (rangeEnd != null) {
-            endDate = LocalDateTime.parse(URLDecoder.decode(rangeEnd.toString(), StandardCharsets.UTF_8));
-            if (endDate.isBefore(startDate) || endDate.equals(startDate)) {
-                throw new IncorrectParameterException("Даты не могут быть равны или дата окончания не может быть раньше даты начала");
-            }
+            pageable = PageRequest.of(from / size, size);
         }
 
         List<Event> events;
-        if (endDate != null) {
-            events = eventRepository.findAllPublishedEventsByFilterAndPeriod(text, categories, paid, startDate, endDate,
-                    onlyAvailable, pageable);
+        if (rangeEnd != null) {
+            events = eventRepository.findAllPublishedEventsByFilterAndPeriod(
+                    text, categories, paid, rangeStart, rangeEnd, onlyAvailable, pageable);
         } else {
-            events = eventRepository.findAllPublishedEventsByFilterAndRangeStart(text, categories, paid, startDate,
-                    onlyAvailable, pageable);
+            events = eventRepository.findAllPublishedEventsByFilterAndRangeStart(
+                    text, categories, paid, rangeStart, onlyAvailable, pageable);
         }
 
         statsClient.createHit(createEndpointHitDto(request));
@@ -89,12 +79,10 @@ public class PublicEventServiceImpl implements PublicEventService {
         List<ViewStatsDto> viewStatsDtoList = statsClient.getStatsByDateAndUris(start, end, List.of(request.getRequestURI()), true);
 
         if (!viewStatsDtoList.isEmpty()) {
-            event.setViews(viewStatsDtoList.getFirst().getHits());
+            event.setViews(viewStatsDtoList.getFirst().getHits()); // Используем get(0) вместо getFirst()
         }
-
         statsClient.createHit(createEndpointHitDto(request));
-
-        return EventMapper.toEventDto(eventRepository.save(event));
+        return EventMapper.toEventDto(event);
     }
 
     @Transactional

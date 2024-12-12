@@ -38,9 +38,6 @@ public class PublicEventController {
                                          @RequestParam(defaultValue = "10") Integer size,
                                          HttpServletRequest request) {
         log.info("Выполнение getEvents");
-        if (size <= 0) {
-            size = 10;
-        }
         return publicEventService.getEvents(rangeStart, rangeEnd, text, categories, paid, onlyAvailable, sort, from, size,
                 request);
     }

@@ -13,10 +13,7 @@ import ru.practicum.mapper.CompilationMapper;
 import ru.practicum.model.Compilation;
 import ru.practicum.model.Event;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -53,16 +50,16 @@ public class CompilationServiceImpl implements CompilationService {
                     ? compilationRequest.getEvents()
                     : Collections.emptyList();
 
-            Set<Event> newEvents = eventIds.stream()
-                    .map(eventRepository::findById)
-                    .filter(Optional::isPresent)
-                    .map(Optional::get)
-                    .collect(Collectors.toSet());
+            List<Event> existingEvents = eventRepository.findAllById(eventIds);
+            if (existingEvents.size() != eventIds.size()) {
+                throw new NotFoundException("One or more events do not exist");
+            }
+
+            Set<Event> newEvents = new HashSet<>(existingEvents);
 
             existingCompilation.setEvents(newEvents);
             existingCompilation.setTitle(compilationRequest.getTitle());
             existingCompilation.setPinned(compilationRequest.getPinned() != null ? compilationRequest.getPinned() : existingCompilation.getPinned());
-
 
             Compilation savedCompilation = compilationRepository.save(existingCompilation);
             return CompilationMapper.toCompilationDto(savedCompilation);
