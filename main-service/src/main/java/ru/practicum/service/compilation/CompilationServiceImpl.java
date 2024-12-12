@@ -45,30 +45,30 @@ public class CompilationServiceImpl implements CompilationService {
 
     @Override
     public CompilationDto updateCompilation(Long id, CompilationRequest compilationRequest) {
-        Compilation existingCompilation = compilationRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Собрание с id = " + id + " не было найдено!"));
+        try {
+            Compilation existingCompilation = compilationRepository.findById(id)
+                    .orElseThrow(() -> new NotFoundException("Compilation with id = " + id + " not found!"));
 
-        List<Long> eventIds = compilationRequest.getEvents() != null
-                ? compilationRequest.getEvents()
-                : Collections.emptyList();
+            List<Long> eventIds = compilationRequest.getEvents() != null
+                    ? compilationRequest.getEvents()
+                    : Collections.emptyList();
 
-        Set<Event> newEvents = eventIds.stream()
-                .map(eventRepository::findById)
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .collect(Collectors.toSet());
+            Set<Event> newEvents = eventIds.stream()
+                    .map(eventRepository::findById)
+                    .filter(Optional::isPresent)
+                    .map(Optional::get)
+                    .collect(Collectors.toSet());
 
-        existingCompilation.setEvents(newEvents);
-
-        if (compilationRequest.getTitle() != null) {
+            existingCompilation.setEvents(newEvents);
             existingCompilation.setTitle(compilationRequest.getTitle());
-        }
-        if (compilationRequest.getPinned() != null) {
-            existingCompilation.setPinned(compilationRequest.getPinned());
-        }
+            existingCompilation.setPinned(compilationRequest.getPinned() != null ? compilationRequest.getPinned() : existingCompilation.getPinned());
 
-        Compilation savedCompilation = compilationRepository.save(existingCompilation);
-        return CompilationMapper.toCompilationDto(savedCompilation);
+
+            Compilation savedCompilation = compilationRepository.save(existingCompilation);
+            return CompilationMapper.toCompilationDto(savedCompilation);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to update compilation", e);
+        }
     }
 
     @Override

@@ -1,8 +1,6 @@
 package ru.practicum.controller.publicapi;
 
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.validation.constraints.Positive;
-import jakarta.validation.constraints.PositiveOrZero;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -36,10 +34,13 @@ public class PublicEventController {
                                          @RequestParam(required = false) Boolean paid,
                                          @RequestParam(defaultValue = "false") Boolean onlyAvailable,
                                          @RequestParam(required = false) String sort,
-                                         @RequestParam(defaultValue = "0") @PositiveOrZero Integer from,
-                                         @RequestParam(defaultValue = "10") @Positive Integer size,
+                                         @RequestParam(defaultValue = "0") Integer from,
+                                         @RequestParam(defaultValue = "10") Integer size,
                                          HttpServletRequest request) {
         log.info("Выполнение getEvents");
+        if (size <= 0) {
+            size = 10;
+        }
         return publicEventService.getEvents(rangeStart, rangeEnd, text, categories, paid, onlyAvailable, sort, from, size,
                 request);
     }
