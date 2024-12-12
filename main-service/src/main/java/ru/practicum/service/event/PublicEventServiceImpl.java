@@ -17,11 +17,14 @@ import ru.practicum.dto.event.EventDto;
 import ru.practicum.dto.event.EventPublic;
 import ru.practicum.dto.event.EventShortDto;
 import ru.practicum.dto.event.State;
+import ru.practicum.exceptions.ConflictException;
 import ru.practicum.exceptions.NotFoundException;
 import ru.practicum.mapper.EventMapper;
 import ru.practicum.model.Event;
 import ru.practicum.stats.StatsClient;
 
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -36,33 +39,49 @@ public class PublicEventServiceImpl implements PublicEventService {
 
     @Override
     public List<EventShortDto> getEvents(EventPublic eventPublic, HttpServletRequest request) {
-        LocalDateTime rangeStart = eventPublic.getRangeStart() != null ?
-                LocalDateTime.parse(eventPublic.getRangeStart(), DateTimeFormatter.ofPattern(Constants.DATE_PATTERN)) :
-                null;
-        LocalDateTime rangeEnd = eventPublic.getRangeEnd() != null ?
-                LocalDateTime.parse(eventPublic.getRangeEnd(), DateTimeFormatter.ofPattern(Constants.DATE_PATTERN)) :
-                null;
-
-        Sort sort = Sort.unsorted();
+        Pageable pageable;
         if (eventPublic.getSort() != null) {
-            String sortField = eventPublic.getSort().equals("EVENT_DATE") ? "eventDate" : "views";
-            sort = Sort.by(sortField).descending();
+            pageable = PageRequest.of(
+                    eventPublic.getFrom() > 0 ? eventPublic.getFrom() / eventPublic.getSize() : 0,
+                    eventPublic.getSize(),
+                    Sort.by(eventPublic.getSort()).descending() // Сортировка по переданному полю
+            );
+        } else {
+            pageable = PageRequest.of(
+                    eventPublic.getFrom() > 0 ? eventPublic.getFrom() / eventPublic.getSize() : 0,
+                    eventPublic.getSize()
+            );
         }
 
-        Pageable pageable = PageRequest.of(eventPublic.getFrom() / eventPublic.getSize(),
-                eventPublic.getSize(), sort);
+        LocalDateTime startDate = null;
+        if (eventPublic.getRangeStart() != null) {
+            startDate = LocalDateTime.parse(URLDecoder.decode(eventPublic.getRangeStart(), StandardCharsets.UTF_8));
+        } else {
+            startDate = LocalDateTime.now();
+        }
+
+        LocalDateTime endDate = null;
+        if (eventPublic.getRangeEnd() != null) {
+            endDate = LocalDateTime.parse(URLDecoder.decode(eventPublic.getRangeEnd(), StandardCharsets.UTF_8));
+        }
+
+        if (endDate != null && (endDate.isBefore(startDate) || endDate.equals(startDate))) {
+            throw new ConflictException("Даты не могут быть равны или дата окончания не может быть раньше даты начала");
+        }
+
         List<Event> events;
-        if (rangeEnd != null) {
+        if (endDate != null) {
             events = eventRepository.findAllPublishedEventsByFilterAndPeriod(
                     eventPublic.getText(), eventPublic.getCategories(), eventPublic.getPaid(),
-                    rangeStart, rangeEnd, eventPublic.getOnlyAvailable(), pageable);
+                    startDate, endDate, eventPublic.getOnlyAvailable(), pageable);
         } else {
             events = eventRepository.findAllPublishedEventsByFilterAndRangeStart(
                     eventPublic.getText(), eventPublic.getCategories(), eventPublic.getPaid(),
-                    rangeStart, eventPublic.getOnlyAvailable(), pageable);
+                    startDate, eventPublic.getOnlyAvailable(), pageable);
         }
 
         statsClient.createHit(createEndpointHitDto(request));
+
         return events.stream()
                 .map(EventMapper::toEventShortDto)
                 .collect(Collectors.toList());
