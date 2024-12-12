@@ -8,7 +8,9 @@ import ru.practicum.model.Category;
 import ru.practicum.model.Event;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 public interface EventRepository extends JpaRepository<Event, Long> {
 
@@ -89,4 +91,6 @@ public interface EventRepository extends JpaRepository<Event, Long> {
                                                             Pageable pageable);
 
     boolean existsByCategory(Category category);
+
+    Collection<? extends Event> findAllByIdIn(Set<Long> eventIds);
 }

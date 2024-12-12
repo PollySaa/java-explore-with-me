@@ -11,12 +11,12 @@ import java.util.Set;
 @UtilityClass
 public class CompilationMapper {
 
-    public static CompilationDto toCompilationDto(Compilation collection) {
+    public static CompilationDto toCompilationDto(Compilation compilation) {
         return CompilationDto.builder()
-                .id(collection.getId())
-                .title(collection.getTitle())
-                .pinned(collection.getPinned())
-                .events(collection.getEvents().stream()
+                .id(compilation.getId())
+                .title(compilation.getTitle())
+                .pinned(compilation.getPinned())
+                .events(compilation.getEvents().stream()
                         .map(EventMapper::toEventShortDto)
                         .toList())
                 .build();
@@ -31,8 +31,8 @@ public class CompilationMapper {
     }
 
     public static Compilation toUpdateCompilation(CompilationRequest updateCompilationRequest,
-                                                 Compilation oldCompilation,
-                                                 Set<Event> newEvents) {
+                                                  Compilation oldCompilation,
+                                                  Set<Event> newEvents) {
         return Compilation.builder()
                 .id(oldCompilation.getId())
                 .events(newEvents)

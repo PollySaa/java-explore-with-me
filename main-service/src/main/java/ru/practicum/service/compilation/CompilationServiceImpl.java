@@ -58,8 +58,16 @@ public class CompilationServiceImpl implements CompilationService {
                 .map(Optional::get)
                 .collect(Collectors.toSet());
 
-        Compilation updatedCompilation = CompilationMapper.toUpdateCompilation(compilationRequest, existingCompilation, newEvents);
-        Compilation savedCompilation = compilationRepository.save(updatedCompilation);
+        existingCompilation.setEvents(newEvents);
+
+        if (compilationRequest.getTitle() != null) {
+            existingCompilation.setTitle(compilationRequest.getTitle());
+        }
+        if (compilationRequest.getPinned() != null) {
+            existingCompilation.setPinned(compilationRequest.getPinned());
+        }
+
+        Compilation savedCompilation = compilationRepository.save(existingCompilation);
         return CompilationMapper.toCompilationDto(savedCompilation);
     }
 
