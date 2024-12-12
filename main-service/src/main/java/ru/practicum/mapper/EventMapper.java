@@ -74,7 +74,7 @@ public class EventMapper {
                 .description(updateRequest.getDescription() != null ? updateRequest.getDescription() : oldEvent.getDescription())
                 .createdOn(oldEvent.getCreatedOn())
                 .eventDate(updateRequest.getEventDate() != null ? updateRequest.getEventDate() : oldEvent.getEventDate())
-                .location(updateRequest.getLocation() != null ? LocationMapper.toLocation(updateRequest.getLocation()) : oldEvent.getLocation())
+                .location(updateRequest.getLocation() != null ? updateRequest.getLocation() : oldEvent.getLocation())
                 .paid(updateRequest.getPaid() != null ? updateRequest.getPaid() : oldEvent.getPaid())
                 .participantLimit(updateRequest.getParticipantLimit() != null ? updateRequest.getParticipantLimit() : oldEvent.getParticipantLimit())
                 .requestModeration(updateRequest.getRequestModeration() != null ? updateRequest.getRequestModeration() : oldEvent.getRequestModeration())

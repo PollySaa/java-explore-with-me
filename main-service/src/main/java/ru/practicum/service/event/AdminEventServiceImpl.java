@@ -13,11 +13,9 @@ import ru.practicum.dao.LocationRepository;
 import ru.practicum.dto.event.EventDto;
 import ru.practicum.dto.event.State;
 import ru.practicum.dto.event.UpdateEventDto;
-import ru.practicum.dto.location.LocationDto;
 import ru.practicum.exceptions.ConflictException;
 import ru.practicum.exceptions.NotFoundException;
 import ru.practicum.mapper.EventMapper;
-import ru.practicum.mapper.LocationMapper;
 import ru.practicum.model.Category;
 import ru.practicum.model.Event;
 import ru.practicum.model.Location;
@@ -71,6 +69,14 @@ public class AdminEventServiceImpl implements AdminEventService {
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new NotFoundException("Событие с id = " + eventId + " не было найдено!"));
 
+        if (updateEventDto.getLocation() != null) {
+            Location location = updateEventDto.getLocation();
+            if (location.getId() == null) {
+                location = locationRepository.save(location);
+            }
+            event.setLocation(location);
+        }
+
         if (!event.getState().equals(State.PENDING)) {
             throw new ConflictException("Событие должно быть в состоянии ожидания публикации!");
         }
@@ -86,14 +92,6 @@ public class AdminEventServiceImpl implements AdminEventService {
                 : categoryRepository.findById(updateEventDto.getCategory())
                 .orElseThrow(() -> new NotFoundException("Категория с id = " + updateEventDto.getCategory() + " не была найдена!"));
 
-        if (updateEventDto.getLocation() != null) {
-            LocationDto locationDto = updateEventDto.getLocation();
-            Location location = LocationMapper.toLocation(locationDto);
-            if (location.getId() == null) {
-                location = locationRepository.save(location);
-            }
-            event.setLocation(location);
-        }
         event = eventRepository.save(EventMapper.toUpdatedEvent(updateEventDto, category, event));
         return EventMapper.toEventDto(event);
     }

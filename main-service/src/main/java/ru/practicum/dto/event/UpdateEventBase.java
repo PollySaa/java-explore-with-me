@@ -7,7 +7,7 @@ import jakarta.validation.constraints.Size;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import ru.practicum.constants.Constants;
-import ru.practicum.dto.location.LocationDto;
+import ru.practicum.model.Location;
 
 import java.time.LocalDateTime;
 
@@ -30,7 +30,7 @@ public class UpdateEventBase {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = Constants.DATE_PATTERN)
     LocalDateTime eventDate;
 
-    LocationDto location;
+    Location location;
 
     Boolean paid;
 
