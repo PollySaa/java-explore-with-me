@@ -44,8 +44,8 @@ public class CompilationServiceImpl implements CompilationService {
         if (compilationRequest.getEvents() != null) {
             newEvents.addAll(eventRepository.findEventsByIdIn(compilationRequest.getEvents(), Constants.ORDER_BY_EVENT_DAY));
         }
-        existingCompilation = compilationRepository.
-                save(CompilationMapper.toUpdateCompilation(compilationRequest, existingCompilation, newEvents));
+        existingCompilation = compilationRepository
+                .save(CompilationMapper.toUpdateCompilation(compilationRequest, existingCompilation, newEvents));
 
         return CompilationMapper.toCompilationDto(existingCompilation);
     }
