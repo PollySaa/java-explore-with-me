@@ -15,6 +15,7 @@ import ru.practicum.model.Compilation;
 import ru.practicum.model.Event;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
@@ -25,10 +26,16 @@ public class CompilationServiceImpl implements CompilationService {
 
     @Override
     public CompilationDto createCompilation(CompilationRequest compilationRequest) {
-        Set<Event> events = new HashSet<>();
-        if (compilationRequest.getEvents() != null) {
-            events = eventRepository.findEventsByIdIn(compilationRequest.getEvents(), Constants.ORDER_BY_EVENT_DAY);
-        }
+        List<Long> eventIds = compilationRequest.getEvents() != null
+                ? compilationRequest.getEvents()
+                : Collections.emptyList();
+
+        Set<Event> events = eventIds.stream()
+                .map(eventRepository::findById)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .collect(Collectors.toSet());
+
         Compilation newCompilation = CompilationMapper.toCompilation(compilationRequest, events);
         Compilation savedCompilation = compilationRepository.save(newCompilation);
         return CompilationMapper.toCompilationDto(savedCompilation);
@@ -39,15 +46,36 @@ public class CompilationServiceImpl implements CompilationService {
         Compilation existingCompilation = compilationRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Compilation with id = " + id + " not found!"));
 
-        Set<Event> newEvents = new TreeSet<>(Comparator.comparing(Event::getEventDate));
-        newEvents.addAll(existingCompilation.getEvents());
-        if (compilationRequest.getEvents() != null) {
-            newEvents.addAll(eventRepository.findEventsByIdIn(compilationRequest.getEvents(), Constants.ORDER_BY_EVENT_DAY));
+        if (compilationRequest.getTitle() == null) {
+            compilationRequest.setTitle(existingCompilation.getTitle());
         }
-        existingCompilation = compilationRepository
-                .save(CompilationMapper.toUpdateCompilation(compilationRequest, existingCompilation, newEvents));
 
-        return CompilationMapper.toCompilationDto(existingCompilation);
+        if (compilationRequest.getPinned() != null) {
+            existingCompilation.setPinned(compilationRequest.getPinned());
+        }
+
+        if (compilationRequest.getEvents() != null) {
+            Set<Event> newEvents = eventRepository.findEventsByIdIn(compilationRequest.getEvents(), Constants.ORDER_BY_EVENT_DAY);
+            existingCompilation.setEvents(newEvents);
+        }
+
+        List<Long> eventIds = compilationRequest.getEvents() != null
+                ? compilationRequest.getEvents()
+                : Collections.emptyList();
+
+        List<Event> existingEvents = eventRepository.findAllById(eventIds);
+        if (existingEvents.size() != eventIds.size()) {
+            throw new NotFoundException("One or more events do not exist");
+        }
+
+        Set<Event> newEvents = new HashSet<>(existingEvents);
+
+        existingCompilation.setEvents(newEvents);
+        existingCompilation.setTitle(compilationRequest.getTitle());
+        existingCompilation.setPinned(compilationRequest.getPinned() != null ? compilationRequest.getPinned() : existingCompilation.getPinned());
+
+        Compilation savedCompilation = compilationRepository.save(existingCompilation);
+        return CompilationMapper.toCompilationDto(savedCompilation);
     }
 
     @Override
