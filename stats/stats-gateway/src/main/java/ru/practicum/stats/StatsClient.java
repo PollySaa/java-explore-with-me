@@ -1,9 +1,10 @@
-package ru.practicume.stats;
+package ru.practicum.stats;
 
-import lombok.AccessLevel;
-import lombok.experimental.FieldDefaults;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -14,10 +15,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 @Component
-@FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 public class StatsClient  {
-    RestTemplate rest;
-    String statsUrl;
+    private final RestTemplate rest;
+    private final String statsUrl;
 
     public StatsClient(RestTemplate rest, @Value("${stats-gateway.url}") String statsUrl) {
         this.rest = rest;
@@ -29,13 +29,18 @@ public class StatsClient  {
         rest.postForEntity(statsUrl + "/hit", requestEntity, Void.class);
     }
 
-    public ViewStatsDto getStatsByDateAndUris(String start, String end, List<String> uris, Boolean unique) {
-
+    public List<ViewStatsDto> getStatsByDateAndUris(String start, String end, List<String> uris, Boolean unique) {
         UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(statsUrl + "/stats")
                 .queryParam("start", start).encode(StandardCharsets.UTF_8)
                 .queryParam("end", end).encode(StandardCharsets.UTF_8)
                 .queryParam("uris", uris)
                 .queryParam("unique", unique);
-        return rest.getForObject(builder.toUriString(), ViewStatsDto.class);
+        ResponseEntity<List<ViewStatsDto>> responseEntity = rest.exchange(
+                builder.toUriString(),
+                HttpMethod.GET,
+                null,
+                new ParameterizedTypeReference<List<ViewStatsDto>>() {});
+
+        return responseEntity.getBody();
     }
 }
