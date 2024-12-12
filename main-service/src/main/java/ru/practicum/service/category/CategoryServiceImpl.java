@@ -36,6 +36,10 @@ public class CategoryServiceImpl implements CategoryService {
         if (Objects.nonNull(categoryRequest.getName())) {
             category.setName(categoryRequest.getName());
         }
+
+        if (categoryRepository.existsByName(categoryRequest.getName())) {
+            throw new ConflictException("Категория уже существует!");
+        }
         return CategoryMapper.toCategoryDto(categoryRepository.save(category));
     }
 
