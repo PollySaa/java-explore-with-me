@@ -13,6 +13,8 @@ import ru.practicum.exceptions.NotFoundException;
 import ru.practicum.mapper.CategoryMapper;
 import ru.practicum.model.Category;
 
+import java.util.Objects;
+
 @Service
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 @AllArgsConstructor
@@ -31,12 +33,10 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public CategoryDto updateCategory(Long id, CategoryRequest categoryRequest) {
         Category category = getCategoryById(id);
-        if (category.getName().equals(categoryRequest.getName())) {
-            Category category1 = CategoryMapper.toCategory(categoryRequest);
-            return CategoryMapper.toCategoryDto(categoryRepository.save(category1));
-        } else {
-            return CategoryMapper.toCategoryDto(category);
+        if (Objects.nonNull(categoryRequest.getName())) {
+            category.setName(categoryRequest.getName());
         }
+        return CategoryMapper.toCategoryDto(categoryRepository.save(category));
     }
 
     @Override
