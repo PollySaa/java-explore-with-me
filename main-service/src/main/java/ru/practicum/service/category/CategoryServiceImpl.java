@@ -32,7 +32,9 @@ public class CategoryServiceImpl implements CategoryService {
     public CategoryDto updateCategory(Long id, CategoryRequest categoryRequest) {
         Category category = getCategoryById(id);
         if (categoryRepository.existsByName(categoryRequest.getName())) {
-            throw new ConflictException("Эта категория уже существует!");
+            Category existingCategory = categoryRepository.findByName(categoryRequest.getName())
+                    .orElseThrow(() -> new NotFoundException("Категория с именем " + categoryRequest.getName() + " не найдена!"));
+            return CategoryMapper.toCategoryDto(existingCategory);
         }
         category.setName(categoryRequest.getName());
         category = categoryRepository.save(category);

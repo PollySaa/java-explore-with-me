@@ -36,6 +36,10 @@ public class PublicEventServiceImpl implements PublicEventService {
 
     @Override
     public List<EventShortDto> getEvents(EventPublic eventPublic, HttpServletRequest request) {
+        if (eventPublic.getSize() == null || eventPublic.getSize() <= 0) {
+            eventPublic.setSize(10);
+        }
+
         Pageable pageable;
         if (eventPublic.getSort() != null) {
             String sortField = eventPublic.getSort().equals("EVENT_DATE") ? "eventDate" : "views";

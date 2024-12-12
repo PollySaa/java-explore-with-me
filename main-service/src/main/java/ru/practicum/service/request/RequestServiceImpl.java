@@ -10,7 +10,6 @@ import ru.practicum.dao.RequestRepository;
 import ru.practicum.dao.UserRepository;
 import ru.practicum.dto.event.State;
 import ru.practicum.dto.request.RequestDto;
-import ru.practicum.dto.request.ResultRequestStatusDto;
 import ru.practicum.dto.request.Status;
 import ru.practicum.exceptions.ConflictException;
 import ru.practicum.exceptions.IncorrectParameterException;
@@ -20,7 +19,6 @@ import ru.practicum.model.Event;
 import ru.practicum.model.Request;
 import ru.practicum.model.User;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -80,11 +78,10 @@ public class RequestServiceImpl implements RequestService {
     }
 
     @Override
-    public List<ResultRequestStatusDto> getRequestsByUserId(Long id) {
+    public List<Request> getRequestsByUserId(Long id) {
         getUserById(id);
-        List<Request> requests = requestRepository.findAllByRequesterId(id, Sort.by(Sort.Direction.DESC,
+        return requestRepository.findAllByRequesterId(id, Sort.by(Sort.Direction.DESC,
                 "created"));
-        return new ArrayList<>(List.of(RequestMapper.toRequest(requests)));
     }
 
     private User getUserById(Long id) {

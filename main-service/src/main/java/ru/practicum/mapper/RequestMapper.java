@@ -34,7 +34,7 @@ public class RequestMapper {
                 .build();
     }
 
-    public static ResultRequestStatusDto toRequest(List<Request> requests) {
+    public static ResultRequestStatusDto toResultRequest(List<Request> requests) {
         return ResultRequestStatusDto.builder()
                 .confirmedRequests(requests.stream()
                         .filter(request -> request.getStatus().equals(Status.CONFIRMED))

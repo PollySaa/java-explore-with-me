@@ -1,7 +1,7 @@
 package ru.practicum.service.request;
 
 import ru.practicum.dto.request.RequestDto;
-import ru.practicum.dto.request.ResultRequestStatusDto;
+import ru.practicum.model.Request;
 
 import java.util.List;
 
@@ -11,5 +11,5 @@ public interface RequestService {
 
     RequestDto cancelRequest(Long id, Long requestId);
 
-    List<ResultRequestStatusDto> getRequestsByUserId(Long id);
+    List<Request> getRequestsByUserId(Long id);
 }

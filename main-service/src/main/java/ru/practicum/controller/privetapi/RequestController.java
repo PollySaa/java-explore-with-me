@@ -7,9 +7,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.dto.request.RequestDto;
-import ru.practicum.dto.request.ResultRequestStatusDto;
+import ru.practicum.mapper.RequestMapper;
+import ru.practicum.model.Request;
 import ru.practicum.service.request.RequestService;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
@@ -36,8 +38,13 @@ public class RequestController {
      }
 
      @GetMapping("/{user-id}/requests")
-     public List<ResultRequestStatusDto> getRequestsByUserId(@PathVariable("user-id") Long id) {
+     public List<RequestDto> getRequestsByUserId(@PathVariable("user-id") Long id) {
          log.info("Выполнение getRequestsByUserId");
-         return requestService.getRequestsByUserId(id);
+         List<RequestDto> requestDto = new ArrayList<>();
+         List<Request> requests = requestService.getRequestsByUserId(id);
+         for (Request request : requests) {
+             requestDto.add(RequestMapper.toRequestDto(request));
+         }
+         return requestDto;
      }
 }
