@@ -3,6 +3,7 @@ package ru.practicum.mapper;
 import lombok.experimental.UtilityClass;
 import ru.practicum.dto.compilation.CompilationDto;
 import ru.practicum.dto.compilation.CompilationRequest;
+import ru.practicum.dto.compilation.NewCompilation;
 import ru.practicum.model.Compilation;
 import ru.practicum.model.Event;
 
@@ -27,6 +28,14 @@ public class CompilationMapper {
                 .events(events)
                 .title(compilationRequest.getTitle())
                 .pinned(compilationRequest.getPinned() == null ? Boolean.FALSE : compilationRequest.getPinned())
+                .build();
+    }
+
+    public static Compilation toCompilation(NewCompilation compilation, Set<Event> events) {
+        return Compilation.builder()
+                .events(events)
+                .title(compilation.getTitle())
+                .pinned(compilation.getPinned() == null ? Boolean.FALSE : compilation.getPinned())
                 .build();
     }
 

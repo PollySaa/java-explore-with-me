@@ -9,6 +9,7 @@ import ru.practicum.dao.CompilationRepository;
 import ru.practicum.dao.EventRepository;
 import ru.practicum.dto.compilation.CompilationDto;
 import ru.practicum.dto.compilation.CompilationRequest;
+import ru.practicum.dto.compilation.NewCompilation;
 import ru.practicum.exceptions.NotFoundException;
 import ru.practicum.mapper.CompilationMapper;
 import ru.practicum.model.Compilation;
@@ -25,9 +26,9 @@ public class CompilationServiceImpl implements CompilationService {
     EventRepository eventRepository;
 
     @Override
-    public CompilationDto createCompilation(CompilationRequest compilationRequest) {
-        List<Long> eventIds = compilationRequest.getEvents() != null
-                ? compilationRequest.getEvents()
+    public CompilationDto createCompilation(NewCompilation newCompilation) {
+        List<Long> eventIds = newCompilation.getEvents() != null
+                ? newCompilation.getEvents()
                 : Collections.emptyList();
 
         Set<Event> events = eventIds.stream()
@@ -36,8 +37,8 @@ public class CompilationServiceImpl implements CompilationService {
                 .map(Optional::get)
                 .collect(Collectors.toSet());
 
-        Compilation newCompilation = CompilationMapper.toCompilation(compilationRequest, events);
-        Compilation savedCompilation = compilationRepository.save(newCompilation);
+        Compilation compilation = CompilationMapper.toCompilation(newCompilation, events);
+        Compilation savedCompilation = compilationRepository.save(compilation);
         return CompilationMapper.toCompilationDto(savedCompilation);
     }
 

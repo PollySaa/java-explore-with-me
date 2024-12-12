@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.dto.compilation.CompilationDto;
 import ru.practicum.dto.compilation.CompilationRequest;
+import ru.practicum.dto.compilation.NewCompilation;
 import ru.practicum.service.compilation.CompilationService;
 
 @Slf4j
@@ -21,9 +22,9 @@ public class CompilationController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public CompilationDto createCompilation(@RequestBody @Valid CompilationRequest compilationRequest) {
+    public CompilationDto createCompilation(@RequestBody @Valid NewCompilation newCompilation) {
         log.info("Выполнение createCategory");
-        return compilationService.createCompilation(compilationRequest);
+        return compilationService.createCompilation(newCompilation);
     }
 
     @PatchMapping("/{comp-id}")
