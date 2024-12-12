@@ -1,6 +1,7 @@
 package ru.practicum.dao;
 
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import ru.practicum.dto.event.State;
@@ -8,7 +9,6 @@ import ru.practicum.model.Category;
 import ru.practicum.model.Event;
 
 import java.time.LocalDateTime;
-import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -92,5 +92,5 @@ public interface EventRepository extends JpaRepository<Event, Long> {
 
     boolean existsByCategory(Category category);
 
-    Collection<? extends Event> findAllByIdIn(Set<Long> eventIds);
+    Set<Event> findEventsByIdIn(List<Long> events, Sort sort);
 }

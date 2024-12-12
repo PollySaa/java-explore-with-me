@@ -4,6 +4,7 @@ import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
+import ru.practicum.constants.Constants;
 import ru.practicum.dao.CompilationRepository;
 import ru.practicum.dao.EventRepository;
 import ru.practicum.dto.compilation.CompilationDto;
@@ -14,7 +15,6 @@ import ru.practicum.model.Compilation;
 import ru.practicum.model.Event;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
@@ -25,16 +25,10 @@ public class CompilationServiceImpl implements CompilationService {
 
     @Override
     public CompilationDto createCompilation(CompilationRequest compilationRequest) {
-        List<Long> eventIds = compilationRequest.getEvents() != null
-                ? compilationRequest.getEvents()
-                : Collections.emptyList();
-
-        Set<Event> events = eventIds.stream()
-                .map(eventRepository::findById)
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .collect(Collectors.toSet());
-
+        Set<Event> events = new HashSet<>();
+        if (compilationRequest.getEvents() != null) {
+            events = eventRepository.findEventsByIdIn(compilationRequest.getEvents(), Constants.ORDER_BY_EVENT_DAY);
+        }
         Compilation newCompilation = CompilationMapper.toCompilation(compilationRequest, events);
         Compilation savedCompilation = compilationRepository.save(newCompilation);
         return CompilationMapper.toCompilationDto(savedCompilation);
@@ -45,28 +39,21 @@ public class CompilationServiceImpl implements CompilationService {
         Compilation existingCompilation = compilationRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Compilation with id = " + id + " not found!"));
 
-        List<Long> eventIds = compilationRequest.getEvents() != null
-                ? compilationRequest.getEvents()
-                : Collections.emptyList();
+        Set<Event> newEvents = new TreeSet<>(Comparator.comparing(Event::getEventDate));
+        newEvents.addAll(existingCompilation.getEvents());
+        if (compilationRequest.getEvents() != null) {
+            newEvents.addAll(eventRepository.findEventsByIdIn(compilationRequest.getEvents(), Constants.ORDER_BY_EVENT_DAY));
+        }
+        existingCompilation = compilationRepository.
+                save(CompilationMapper.toUpdateCompilation(compilationRequest, existingCompilation, newEvents));
 
-        Set<Event> newEvents = eventIds.stream()
-                .map(eventRepository::findById)
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .collect(Collectors.toSet());
-
-        existingCompilation.setEvents(newEvents);
-        existingCompilation.setTitle(compilationRequest.getTitle());
-        existingCompilation.setPinned(compilationRequest.getPinned() != null ? compilationRequest.getPinned() : existingCompilation.getPinned());
-
-        Compilation savedCompilation = compilationRepository.save(existingCompilation);
-        return CompilationMapper.toCompilationDto(savedCompilation);
+        return CompilationMapper.toCompilationDto(existingCompilation);
     }
 
     @Override
     public void deleteCompilation(Long id) {
         if (!compilationRepository.existsById(id)) {
-            throw new NotFoundException("Собрание с id = " + id + " не было найдено!");
+            throw new NotFoundException("Compilation with id = " + id + " not found!");
         }
 
         compilationRepository.deleteById(id);
