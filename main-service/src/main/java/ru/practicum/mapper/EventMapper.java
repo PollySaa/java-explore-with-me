@@ -67,31 +67,34 @@ public class EventMapper {
     }
 
     public static Event toUpdatedEvent(UpdateEventDto updateRequest, Category newCategory, Event oldEvent) {
-        State newState = oldEvent.getState();
+        Event updatedEvent = Event.builder()
+                .id(oldEvent.getId())
+                .annotation(updateRequest.getAnnotation() != null ? updateRequest.getAnnotation() : oldEvent.getAnnotation())
+                .category(newCategory)
+                .description(updateRequest.getDescription() != null ? updateRequest.getDescription() : oldEvent.getDescription())
+                .createdOn(oldEvent.getCreatedOn())
+                .eventDate(updateRequest.getEventDate() != null ? updateRequest.getEventDate() : oldEvent.getEventDate())
+                .location(updateRequest.getLocation() != null ? LocationMapper.toLocation(updateRequest.getLocation()) : oldEvent.getLocation())
+                .paid(updateRequest.getPaid() != null ? updateRequest.getPaid() : oldEvent.getPaid())
+                .participantLimit(updateRequest.getParticipantLimit() != null ? updateRequest.getParticipantLimit() : oldEvent.getParticipantLimit())
+                .requestModeration(updateRequest.getRequestModeration() != null ? updateRequest.getRequestModeration() : oldEvent.getRequestModeration())
+                .title(updateRequest.getTitle() != null ? updateRequest.getTitle() : oldEvent.getTitle())
+                .confirmedRequests(oldEvent.getConfirmedRequests())
+                .initiator(oldEvent.getInitiator())
+                .views(oldEvent.getViews())
+                .state(oldEvent.getState())
+                .build();
+
         if (updateRequest.getStateAction() != null) {
             switch (updateRequest.getStateAction()) {
-                case SEND_TO_REVIEW -> newState = State.PENDING;
-                case REJECT_EVENT, CANCEL_REVIEW -> newState = State.CANCELED;
+                case SEND_TO_REVIEW -> updatedEvent.setState(State.PENDING);
+                case REJECT_EVENT, CANCEL_REVIEW -> updatedEvent.setState(State.CANCELED);
                 case PUBLISH_EVENT -> {
-                    newState = State.PUBLISHED;
-                    oldEvent.setPublishedOn(LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS));
+                    updatedEvent.setState(State.PUBLISHED);
+                    updatedEvent.setPublishedOn(LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS));
                 }
             }
         }
-        oldEvent.setTitle(updateRequest.getTitle() == null ? oldEvent.getTitle() : updateRequest.getTitle());
-        oldEvent.setAnnotation(updateRequest.getAnnotation() == null ? oldEvent.getAnnotation() : updateRequest.getAnnotation());
-        oldEvent.setCategory(newCategory);
-        oldEvent.setDescription(updateRequest.getDescription() == null ? oldEvent.getDescription() : updateRequest.getDescription());
-        oldEvent.setEventDate(updateRequest.getEventDate() == null ? oldEvent.getEventDate()
-                : updateRequest.getEventDate());
-        oldEvent.setLocation(updateRequest.getLocation() == null ? oldEvent.getLocation()
-                : LocationMapper.toLocation(updateRequest.getLocation()));
-        oldEvent.setPaid(updateRequest.getPaid() == null ? oldEvent.getPaid() : updateRequest.getPaid());
-        oldEvent.setParticipantLimit(updateRequest.getParticipantLimit() == null ? oldEvent.getParticipantLimit()
-                : updateRequest.getParticipantLimit());
-        oldEvent.setRequestModeration(updateRequest.getRequestModeration() == null ? oldEvent.getRequestModeration()
-                : updateRequest.getRequestModeration());
-        oldEvent.setState(newState);
-        return oldEvent;
+        return updatedEvent;
     }
 }

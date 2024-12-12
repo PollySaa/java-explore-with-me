@@ -31,14 +31,12 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public CategoryDto updateCategory(Long id, CategoryRequest categoryRequest) {
         Category category = getCategoryById(id);
-        if (categoryRepository.existsByName(categoryRequest.getName())) {
-            Category existingCategory = categoryRepository.findByName(categoryRequest.getName())
-                    .orElseThrow(() -> new NotFoundException("Категория с именем " + categoryRequest.getName() + " не найдена!"));
-            return CategoryMapper.toCategoryDto(existingCategory);
+        if (category.getName().equals(categoryRequest.getName())) {
+            Category category1 = CategoryMapper.toCategory(categoryRequest);
+            return CategoryMapper.toCategoryDto(categoryRepository.save(category1));
+        } else {
+            return CategoryMapper.toCategoryDto(category);
         }
-        category.setName(categoryRequest.getName());
-        category = categoryRepository.save(category);
-        return CategoryMapper.toCategoryDto(category);
     }
 
     @Override
