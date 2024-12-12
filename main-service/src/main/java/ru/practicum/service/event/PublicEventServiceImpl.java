@@ -13,18 +13,13 @@ import ru.practicum.EndpointHitDto;
 import ru.practicum.ViewStatsDto;
 import ru.practicum.constants.Constants;
 import ru.practicum.dao.EventRepository;
-import ru.practicum.dto.event.EventDto;
-import ru.practicum.dto.event.EventPublic;
-import ru.practicum.dto.event.EventShortDto;
-import ru.practicum.dto.event.State;
+import ru.practicum.dto.event.*;
 import ru.practicum.exceptions.ConflictException;
 import ru.practicum.exceptions.NotFoundException;
 import ru.practicum.mapper.EventMapper;
 import ru.practicum.model.Event;
 import ru.practicum.stats.StatsClient;
 
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -41,36 +36,25 @@ public class PublicEventServiceImpl implements PublicEventService {
     public List<EventShortDto> getEvents(EventPublic eventPublic, HttpServletRequest request) {
         Pageable pageable;
         if (eventPublic.getSort() != null) {
-            pageable = PageRequest.of(
-                    eventPublic.getFrom() > 0 ? eventPublic.getFrom() / eventPublic.getSize() : 0,
-                    eventPublic.getSize(),
-                    Sort.by(eventPublic.getSort()).descending() // Сортировка по переданному полю
-            );
+            String sortField = eventPublic.getSort().equals(SortType.EVENT_DATE.name()) ? "eventDate" : "views";
+            pageable = PageRequest.of(eventPublic.getFrom() > 0 ? eventPublic.getFrom() / eventPublic.getSize() : 0,
+                    eventPublic.getSize(), Sort.by(sortField).descending());
         } else {
-            pageable = PageRequest.of(
-                    eventPublic.getFrom() > 0 ? eventPublic.getFrom() / eventPublic.getSize() : 0,
-                    eventPublic.getSize()
-            );
+            pageable = PageRequest.of(eventPublic.getFrom() > 0 ? eventPublic.getFrom() / eventPublic.getSize() : 0,
+                    eventPublic.getSize());
         }
-
-        LocalDateTime startDate = null;
-        if (eventPublic.getRangeStart() != null) {
-            startDate = LocalDateTime.parse(URLDecoder.decode(eventPublic.getRangeStart(), StandardCharsets.UTF_8));
-        } else {
-            startDate = LocalDateTime.now();
-        }
-
+        LocalDateTime startDate = LocalDateTime.parse(eventPublic.getRangeStart(), Constants.DATE_TIME_FORMATTER);
         LocalDateTime endDate = null;
         if (eventPublic.getRangeEnd() != null) {
-            endDate = LocalDateTime.parse(URLDecoder.decode(eventPublic.getRangeEnd(), StandardCharsets.UTF_8));
-        }
-
-        if (endDate != null && (endDate.isBefore(startDate) || endDate.equals(startDate))) {
-            throw new ConflictException("Даты не могут быть равны или дата окончания не может быть раньше даты начала");
+            endDate = LocalDateTime.parse(eventPublic.getRangeEnd(), Constants.DATE_TIME_FORMATTER);
         }
 
         List<Event> events;
         if (endDate != null) {
+            if (endDate.isBefore(startDate) ||
+                    endDate.equals(startDate)) {
+                throw new ConflictException("Даты не могут быть равны или дата окончания не может быть раньше даты начала");
+            }
             events = eventRepository.findAllPublishedEventsByFilterAndPeriod(
                     eventPublic.getText(), eventPublic.getCategories(), eventPublic.getPaid(),
                     startDate, endDate, eventPublic.getOnlyAvailable(), pageable);
@@ -81,7 +65,6 @@ public class PublicEventServiceImpl implements PublicEventService {
         }
 
         statsClient.createHit(createEndpointHitDto(request));
-
         return events.stream()
                 .map(EventMapper::toEventShortDto)
                 .collect(Collectors.toList());
