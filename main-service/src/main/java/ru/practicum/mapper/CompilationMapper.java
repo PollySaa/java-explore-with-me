@@ -29,17 +29,4 @@ public class CompilationMapper {
                 .pinned(compilationRequest.getPinned() == null ? Boolean.FALSE : compilationRequest.getPinned())
                 .build();
     }
-
-    public static Compilation toUpdateCompilation(CompilationRequest updateCompilationRequest,
-                                                  Compilation oldCompilation,
-                                                  Set<Event> newEvents) {
-        return Compilation.builder()
-                .id(oldCompilation.getId())
-                .events(newEvents)
-                .pinned(updateCompilationRequest.getPinned() == null ? oldCompilation.getPinned()
-                        : updateCompilationRequest.getPinned())
-                .title(updateCompilationRequest.getTitle() == null ? oldCompilation.getTitle()
-                        : updateCompilationRequest.getTitle())
-                .build();
-    }
 }
