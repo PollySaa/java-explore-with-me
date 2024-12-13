@@ -14,12 +14,14 @@ import ru.practicum.ViewStatsDto;
 import ru.practicum.constants.Constants;
 import ru.practicum.dao.EventRepository;
 import ru.practicum.dto.event.*;
-import ru.practicum.exceptions.ConflictException;
+import ru.practicum.exceptions.IncorrectParameterException;
 import ru.practicum.exceptions.NotFoundException;
 import ru.practicum.mapper.EventMapper;
 import ru.practicum.model.Event;
 import ru.practicum.stats.StatsClient;
 
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -33,35 +35,31 @@ public class PublicEventServiceImpl implements PublicEventService {
     private final StatsClient statsClient;
 
     @Override
-    public List<EventShortDto> getEvents(EventPublic eventPublic, HttpServletRequest request) {
+    public List<EventShortDto> getEvents(String text, List<Long> categories, Boolean paid, String rangeStart, String rangeEnd,
+                                         Boolean onlyAvailable, String sort, Integer from, Integer size,
+                                         HttpServletRequest request) {
         Pageable pageable;
-        if (eventPublic.getSort() != null) {
-            String sortField = eventPublic.getSort().equals(SortType.EVENT_DATE.name()) ? "eventDate" : "views";
-            pageable = PageRequest.of(eventPublic.getFrom() > 0 ? eventPublic.getFrom() / eventPublic.getSize() : 0,
-                    eventPublic.getSize(), Sort.by(sortField).descending());
+        if (sort != null) {
+            String sortField = sort.equals(SortType.EVENT_DATE.name()) ? "eventDate" : "views";
+            pageable = PageRequest.of(from > 0 ? from / size : 0, size, Sort.by(sortField).descending());
         } else {
-            pageable = PageRequest.of(eventPublic.getFrom() > 0 ? eventPublic.getFrom() / eventPublic.getSize() : 0,
-                    eventPublic.getSize());
+            pageable = PageRequest.of(from > 0 ? from / size : 0, size);
         }
-        LocalDateTime startDate = LocalDateTime.parse(eventPublic.getRangeStart(), Constants.DATE_TIME_FORMATTER);
+        LocalDateTime startDate = rangeStart != null
+                ? LocalDateTime.parse(URLDecoder.decode(rangeStart, StandardCharsets.UTF_8), Constants.DATE_TIME_FORMATTER)
+                : LocalDateTime.now();
         LocalDateTime endDate = null;
-        if (eventPublic.getRangeEnd() != null) {
-            endDate = LocalDateTime.parse(eventPublic.getRangeEnd(), Constants.DATE_TIME_FORMATTER);
+        if (rangeEnd != null) {
+            endDate = LocalDateTime.parse(URLDecoder.decode(rangeEnd, StandardCharsets.UTF_8), Constants.DATE_TIME_FORMATTER);
         }
-
         List<Event> events;
         if (endDate != null) {
-            if (endDate.isBefore(startDate) ||
-                    endDate.equals(startDate)) {
-                throw new ConflictException("Даты не могут быть равны или дата окончания не может быть раньше даты начала");
+            if (endDate.isBefore(startDate) || endDate.equals(startDate)) {
+                throw new IncorrectParameterException("Даты не могут быть равны или дата окончания не может быть раньше даты начала");
             }
-            events = eventRepository.findAllPublishedEventsByFilterAndPeriod(
-                    eventPublic.getText(), eventPublic.getCategories(), eventPublic.getPaid(),
-                    startDate, endDate, eventPublic.getOnlyAvailable(), pageable);
+            events = eventRepository.findAllPublishedEventsByFilterAndPeriod(text, categories, paid, startDate, endDate, onlyAvailable, pageable);
         } else {
-            events = eventRepository.findAllPublishedEventsByFilterAndRangeStart(
-                    eventPublic.getText(), eventPublic.getCategories(), eventPublic.getPaid(),
-                    startDate, eventPublic.getOnlyAvailable(), pageable);
+            events = eventRepository.findAllPublishedEventsByFilterAndRangeStart(text, categories, paid, startDate, onlyAvailable, pageable);
         }
 
         statsClient.createHit(createEndpointHitDto(request));
