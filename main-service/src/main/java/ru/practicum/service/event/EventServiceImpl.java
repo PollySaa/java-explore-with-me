@@ -111,7 +111,8 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public ResultRequestStatusDto approveRequestByOwnerId(Long ownerId, Long eventId, EventRequestStatus eventRequestStatus) {
+    public ResultRequestStatusDto approveRequestByOwnerId(Long ownerId, Long eventId,
+                                                          EventRequestStatus eventRequestStatus) {
         checkExistUser(ownerId);
         Event event = getEventById(eventId);
 
@@ -134,7 +135,8 @@ public class EventServiceImpl implements EventService {
                 throw new ConflictException("Запрос с id = " + request.getId() + " не относится к событию с id = " + eventId);
             }
 
-            if (!event.getParticipantLimit().equals(0) && event.getConfirmedRequests().equals(event.getParticipantLimit())) {
+            if (!event.getParticipantLimit().equals(0) && event.getConfirmedRequests()
+                    .equals(event.getParticipantLimit())) {
                 throw new ConflictException("Достигнут лимит запросов!");
             }
 

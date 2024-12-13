@@ -73,8 +73,8 @@ public interface EventRepository extends JpaRepository<Event, Long> {
         and e.state = 'PUBLISHED'
         """)
     List<Event> findAllPublishedEventsByFilterAndPeriod(String text, List<Long> categories, Boolean paid,
-                                                        LocalDateTime rangeStart, LocalDateTime rangeEnd, Boolean onlyAvailable,
-                                                        Pageable pageable);
+                                                        LocalDateTime rangeStart, LocalDateTime rangeEnd,
+                                                        Boolean onlyAvailable, Pageable pageable);
 
     @Query("""
             select e

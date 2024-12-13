@@ -56,7 +56,8 @@ public class CompilationServiceImpl implements CompilationService {
         }
 
         if (compilationRequest.getEvents() != null) {
-            Set<Event> newEvents = eventRepository.findEventsByIdIn(compilationRequest.getEvents(), Constants.ORDER_BY_EVENT_DAY);
+            Set<Event> newEvents = eventRepository.findEventsByIdIn(compilationRequest.getEvents(),
+                    Constants.ORDER_BY_EVENT_DAY);
             existingCompilation.setEvents(newEvents);
         }
 
@@ -73,7 +74,8 @@ public class CompilationServiceImpl implements CompilationService {
 
         existingCompilation.setEvents(newEvents);
         existingCompilation.setTitle(compilationRequest.getTitle());
-        existingCompilation.setPinned(compilationRequest.getPinned() != null ? compilationRequest.getPinned() : existingCompilation.getPinned());
+        existingCompilation.setPinned(compilationRequest.getPinned() != null ? compilationRequest.getPinned() :
+                existingCompilation.getPinned());
 
         Compilation savedCompilation = compilationRepository.save(existingCompilation);
         return CompilationMapper.toCompilationDto(savedCompilation);

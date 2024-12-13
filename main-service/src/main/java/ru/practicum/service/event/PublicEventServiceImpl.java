@@ -35,9 +35,9 @@ public class PublicEventServiceImpl implements PublicEventService {
     private final StatsClient statsClient;
 
     @Override
-    public List<EventShortDto> getEvents(String text, List<Long> categories, Boolean paid, String rangeStart, String rangeEnd,
-                                         Boolean onlyAvailable, String sort, Integer from, Integer size,
-                                         HttpServletRequest request) {
+    public List<EventShortDto> getEvents(String text, List<Long> categories, Boolean paid, String rangeStart,
+                                         String rangeEnd, Boolean onlyAvailable, String sort, Integer from,
+                                         Integer size, HttpServletRequest request) {
         Pageable pageable;
         if (sort != null) {
             String sortField = sort.equals(SortType.EVENT_DATE.name()) ? "eventDate" : "views";
@@ -46,20 +46,24 @@ public class PublicEventServiceImpl implements PublicEventService {
             pageable = PageRequest.of(from > 0 ? from / size : 0, size);
         }
         LocalDateTime startDate = rangeStart != null
-                ? LocalDateTime.parse(URLDecoder.decode(rangeStart, StandardCharsets.UTF_8), Constants.DATE_TIME_FORMATTER)
+                ? LocalDateTime.parse(URLDecoder.decode(rangeStart, StandardCharsets.UTF_8),
+                Constants.DATE_TIME_FORMATTER)
                 : LocalDateTime.now();
         LocalDateTime endDate = null;
         if (rangeEnd != null) {
-            endDate = LocalDateTime.parse(URLDecoder.decode(rangeEnd, StandardCharsets.UTF_8), Constants.DATE_TIME_FORMATTER);
+            endDate = LocalDateTime.parse(URLDecoder.decode(rangeEnd, StandardCharsets.UTF_8),
+                    Constants.DATE_TIME_FORMATTER);
         }
         List<Event> events;
         if (endDate != null) {
             if (endDate.isBefore(startDate) || endDate.equals(startDate)) {
                 throw new IncorrectParameterException("Даты не могут быть равны или дата окончания не может быть раньше даты начала");
             }
-            events = eventRepository.findAllPublishedEventsByFilterAndPeriod(text, categories, paid, startDate, endDate, onlyAvailable, pageable);
+            events = eventRepository.findAllPublishedEventsByFilterAndPeriod(text, categories, paid, startDate, endDate,
+                    onlyAvailable, pageable);
         } else {
-            events = eventRepository.findAllPublishedEventsByFilterAndRangeStart(text, categories, paid, startDate, onlyAvailable, pageable);
+            events = eventRepository.findAllPublishedEventsByFilterAndRangeStart(text, categories, paid, startDate,
+                    onlyAvailable, pageable);
         }
 
         statsClient.createHit(createEndpointHitDto(request));

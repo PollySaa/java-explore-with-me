@@ -25,11 +25,4 @@ public class ErrorHandler {
         log.error("Получен статус HttpStatus.NOT_FOUND.toString(), {}", e.getMessage(), e);
         return new ErrorResponse(e.getMessage());
     }
-
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public ErrorResponse handleInternalError(final Throwable e) {
-        log.error("Получен статус HttpStatus.INTERNAL_SERVER_ERROR.toString(), {}", e.getMessage());
-        return new ErrorResponse(e.getMessage());
-    }
 }

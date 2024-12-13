@@ -30,6 +30,9 @@ public class StatsServiceImpl implements StatsService {
 
     @Override
     public List<ViewStatsDto> getStatsByDateAndUris(String start, String end, List<String> uris, Boolean unique) {
+        if (start == null || end == null) {
+            throw new ValidationException("Время начала и конца обязательные параметры");
+        }
         LocalDateTime startTime;
         LocalDateTime endTime;
 

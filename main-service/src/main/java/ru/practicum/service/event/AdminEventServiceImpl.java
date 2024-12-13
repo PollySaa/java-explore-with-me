@@ -41,10 +41,12 @@ public class AdminEventServiceImpl implements AdminEventService {
         LocalDateTime end = null;
 
         if (rangeStart != null) {
-            start = LocalDateTime.parse(URLDecoder.decode(rangeStart, StandardCharsets.UTF_8), Constants.DATE_TIME_FORMATTER);
+            start = LocalDateTime.parse(URLDecoder.decode(rangeStart, StandardCharsets.UTF_8),
+                    Constants.DATE_TIME_FORMATTER);
         }
         if (rangeEnd != null) {
-            end = LocalDateTime.parse(URLDecoder.decode(rangeEnd, StandardCharsets.UTF_8), Constants.DATE_TIME_FORMATTER);
+            end = LocalDateTime.parse(URLDecoder.decode(rangeEnd, StandardCharsets.UTF_8),
+                    Constants.DATE_TIME_FORMATTER);
         }
         List<Event> events;
         if (start != null && end != null) {
