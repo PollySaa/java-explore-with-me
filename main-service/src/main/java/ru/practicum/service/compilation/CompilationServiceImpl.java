@@ -10,6 +10,7 @@ import ru.practicum.dao.EventRepository;
 import ru.practicum.dto.compilation.CompilationDto;
 import ru.practicum.dto.compilation.CompilationRequest;
 import ru.practicum.dto.compilation.NewCompilation;
+import ru.practicum.exceptions.IncorrectParameterException;
 import ru.practicum.exceptions.NotFoundException;
 import ru.practicum.mapper.CompilationMapper;
 import ru.practicum.model.Compilation;
@@ -84,7 +85,7 @@ public class CompilationServiceImpl implements CompilationService {
     @Override
     public void deleteCompilation(Long id) {
         if (!compilationRepository.existsById(id)) {
-            throw new NotFoundException("Compilation with id = " + id + " not found!");
+            throw new IncorrectParameterException("Compilation with id = " + id + " not found!");
         }
 
         compilationRepository.deleteById(id);

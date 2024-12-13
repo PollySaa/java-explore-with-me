@@ -24,6 +24,6 @@ public class EventShortDto {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = Constants.DATE_PATTERN)
     LocalDateTime eventDate;
     UserShortDto initiator;
-    Boolean paid;
+    boolean paid;
     Long views;
 }
