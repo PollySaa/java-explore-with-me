@@ -1198,8 +1198,6 @@
 									"    pm.response.to.be.ok;\r",
 									"});\r",
 									"\r",
-									"const target = pm.response.json();\r",
-									"\r",
 									"pm.test(\"После модерации у комментария должен быть статус PUBLISHED\", function () {\r",
 									"    pm.expect(target.status).equal(\"PUBLISHED\");\r",
 									"});"
@@ -1213,7 +1211,7 @@
 						"method": "PATCH",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:8080/admin/comments/2",
+							"raw": "http://localhost:8080/admin/comments/1",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -1222,7 +1220,7 @@
 							"path": [
 								"admin",
 								"comments",
-								"2"
+								"1"
 							]
 						}
 					},
