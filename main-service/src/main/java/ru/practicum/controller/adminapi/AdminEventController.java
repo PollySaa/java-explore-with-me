@@ -29,7 +29,7 @@ public class AdminEventController {
                                              @RequestParam(required = false) String rangeEnd,
                                              @RequestParam(defaultValue = "0") Integer from,
                                              @RequestParam(defaultValue = "10") Integer size) {
-        log.info("Выполнение getEventsWithParam");
+        log.info("Выполнение getEventsWithParam" );
         return adminEventService.getEventsWithParam(users, states, categories, rangeStart, rangeEnd, from, size);
     }
 
