@@ -1198,6 +1198,7 @@
 									"    pm.response.to.be.ok;\r",
 									"});\r",
 									"\r",
+									"const target = pm.response.json();\r",
 									"pm.test(\"После модерации у комментария должен быть статус PUBLISHED\", function () {\r",
 									"    pm.expect(target.status).equal(\"PUBLISHED\");\r",
 									"});"
